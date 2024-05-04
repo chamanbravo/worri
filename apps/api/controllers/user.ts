@@ -1,34 +1,62 @@
 import { Request, Response } from "express";
-import { Users } from "../db/schema";
+import { users, workspaces, workspacesUsers } from "../db/schema";
 import db from "../db";
 import logger from "../logger";
 import { eq } from "drizzle-orm";
 import { compare, hash } from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 import {
   createAccessToken,
   createRefreshToken,
   setTokens,
 } from "../utils/token";
 
+export const needSetup = async (req: Request, res: Response) => {
+  try {
+    const existingUser = await db.select().from(users);
+
+    if (existingUser.length > 0) {
+      return res.status(200).json({ needSetup: false });
+    }
+
+    return res.status(200).json({ needSetup: true });
+  } catch (err) {
+    return res.status(400).json({ message: "Something went wrong" });
+  }
+};
+
 export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
   try {
-    const existingUser = await db
-      .select()
-      .from(Users)
-      .where(eq(Users.username, username) || eq(Users.email, email));
+    const existingUser = await db.select().from(users);
 
     if (existingUser.length > 0) {
       return res.status(400).json({ message: "User already exists!" });
     }
 
     const hashedPassword = await hash(password, 10);
-    await db
-      .insert(Users)
-      .values({ username, email, password: hashedPassword });
+    const user = await db
+      .insert(users)
+      .values({ username, email, password: hashedPassword })
+      .returning({
+        username: users.username,
+      });
+
+    await db.insert(workspaces).values({
+      name: "cool-space",
+      access_code: uuidv4().split("-")[0],
+    });
+    await db.insert(workspacesUsers).values({
+      workspace_name: "cool-space",
+      username: user[0].username,
+      role: "admin",
+    });
 
     const accessToken = createAccessToken({ username, email });
-    const refreshToken = createRefreshToken({ username, email });
+    const refreshToken = createRefreshToken({
+      username,
+      email,
+    });
 
     setTokens(res, refreshToken, accessToken);
 
@@ -46,9 +74,9 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   try {
-    const user = await db.select().from(Users).where(eq(username, username));
+    const user = await db.select().from(users).where(eq(username, username));
     if (user.length === 0) {
-      return res.status(400).json({ message: "Invalid credentials!" });
+      return res.status(400).json({ message: "Invalid username!" });
     }
 
     const isPasswordValid = await compare(password, user[0].password);
@@ -77,9 +105,9 @@ export const updateUser = async (req: Request, res: Response) => {
   const { username } = res.locals.user;
   try {
     await db
-      .update(Users)
+      .update(users)
       .set({ firstname, lastname })
-      .where(eq(Users.username, username));
+      .where(eq(users.username, username));
 
     return res.status(200).json({
       message: "User updated successfully!",
@@ -96,8 +124,8 @@ export const updatePassword = async (req: Request, res: Response) => {
   try {
     const user = await db
       .select()
-      .from(Users)
-      .where(eq(Users.username, username));
+      .from(users)
+      .where(eq(users.username, username));
 
     if (user.length === 0) {
       return res.status(400).json({ message: "User does not exist!" });
@@ -109,7 +137,7 @@ export const updatePassword = async (req: Request, res: Response) => {
     }
 
     await db
-      .update(Users)
+      .update(users)
       .set({ password: await hash(newPassword, 10) })
       .where(eq(username, username));
 

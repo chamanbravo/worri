@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { websites, workspaces } from "../db/schema";
+import { websites } from "../db/schema";
 import db from "../db";
 import logger from "../logger";
 import { eq, sql } from "drizzle-orm";
 
 export const addWebsite = async (req: Request, res: Response) => {
-  const { domain, name, workspaceId } = req.body;
+  const { domain, name, workspaceName } = req.body;
   const { id: user_id } = res.locals.user;
   try {
     const website = await db
@@ -14,13 +14,13 @@ export const addWebsite = async (req: Request, res: Response) => {
         name: name,
         domain: domain,
         created_by: user_id,
-        workspace_id: workspaceId,
+        workspace_name: workspaceName,
       })
       .returning({
         id: websites.id,
         name: websites.name,
         domain: websites.domain,
-        workspaceId: workspaceId,
+        workspace_name: workspaceName,
       })
       .onConflictDoNothing();
 
@@ -40,7 +40,7 @@ export const listWebsite = async (req: Request, res: Response) => {
     const websiteList = await db
       .select()
       .from(websites)
-      .where(sql`${websites.workspace_id} = ${workspaceId}`);
+      .where(sql`${websites.workspace_name} = ${workspaceId}`);
 
     return res.status(200).json({
       message: "Workspaces listed successfully!",

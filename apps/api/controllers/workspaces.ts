@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 
 export const createWorkspace = async (req: Request, res: Response) => {
   const { name } = req.body;
-  const { id: user_id } = res.locals.user;
+  const { username } = res.locals.user;
   try {
     const existingWorkspace = await db
       .select()
@@ -22,7 +22,6 @@ export const createWorkspace = async (req: Request, res: Response) => {
       .insert(workspaces)
       .values({ name, access_code: uuidv4().split("-")[0] })
       .returning({
-        id: workspaces.id,
         name: workspaces.name,
         access_code: workspaces.access_code,
       })
@@ -32,8 +31,8 @@ export const createWorkspace = async (req: Request, res: Response) => {
       .insert(workspacesUsers)
       .values({
         role: "admin",
-        workspace_id: workspace[0].id,
-        user_id: user_id,
+        workspace_name: workspace[0].name,
+        username: username,
       })
       .onConflictDoNothing();
 
@@ -74,9 +73,8 @@ export const updateWorkspace = async (req: Request, res: Response) => {
     const updatedWorkspace = await db
       .update(workspaces)
       .set({ name, access_code })
-      .where(eq(workspaces.id, id))
+      .where(eq(workspaces.name, name))
       .returning({
-        id: workspaces.id,
         name: workspaces.name,
         access_code: workspaces.access_code,
       });

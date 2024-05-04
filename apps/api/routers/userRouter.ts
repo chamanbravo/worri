@@ -1,6 +1,7 @@
 import express from "express";
 import {
   login,
+  needSetup,
   register,
   updatePassword,
   updateUser,
@@ -16,16 +17,17 @@ import {
 
 const UserRouter = express.Router();
 
-UserRouter.post("/auth/register", zodParser(userRegistrationSchema), register);
-UserRouter.post("/auth/login", zodParser(userLoginSchema), login);
+UserRouter.get("/users/setup", needSetup);
+UserRouter.post("/users/register", zodParser(userRegistrationSchema), register);
+UserRouter.post("/users/login", zodParser(userLoginSchema), login);
 UserRouter.patch(
-  "/user/update",
+  "/users/update",
   zodParser(userUpdateSchema),
   verifyToken,
   updateUser
 );
 UserRouter.patch(
-  "/user/update-password",
+  "/users/update-password",
   zodParser(userUpdatePasswordSchema),
   verifyToken,
   updatePassword

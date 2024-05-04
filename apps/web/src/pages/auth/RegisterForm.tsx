@@ -58,7 +58,7 @@ export default function RegisterForm() {
         toast({
           title: "Account Created",
         });
-        return navigate("/chad/dashboard");
+        return navigate("/cool-space/dashboard");
       } else if (response.status === 400) {
         const data = await response.json();
         if (data?.message) {

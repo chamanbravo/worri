@@ -8,7 +8,7 @@ from .models import Workspace
 
 @register(User)
 class UserAdmin(ModelAdmin):
-    list_display = ("id", "username", "firstname")
+    list_display = ("id", "username", "email", "role", "firstname", "lastname")
 
 
 @register(Website)
@@ -18,4 +18,4 @@ class WebsiteAdmin(ModelAdmin):
 
 @register(Workspace)
 class WorkspaceAdmin(ModelAdmin):
-    list_display = ("id", "name")
+    list_display = ("id", "name", "access_code", "created_by")

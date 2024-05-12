@@ -1,3 +1,5 @@
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager
 from django.db import models
 
 
@@ -23,7 +25,7 @@ class Workspace(BaseModel):
         return self.name
 
 
-class User(BaseModel):
+class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     firstname = models.CharField(max_length=30, default="")
     lastname = models.CharField(max_length=30, default="")
@@ -38,18 +40,20 @@ class User(BaseModel):
         ],
     )
     workspace = models.ManyToManyField(
-        Workspace, related_name="users", null=True, blank=True
+        Workspace, related_name="users", blank=True
     )
 
+    objects = UserManager()
+
     def __str__(self) -> str:
-        return self.name
+        return self.username
 
 
 class Website(BaseModel):
     name = models.CharField(max_length=32)
     domain = models.CharField(max_length=32)
     workspace = models.ForeignKey(
-        Workspace, on_delete=models.PROTECT, related_name="website"
+        Workspace, on_delete=models.PROTECT, related_name="websites"
     )
     created_by = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="websites"

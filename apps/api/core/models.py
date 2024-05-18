@@ -27,8 +27,8 @@ class Workspace(BaseModel):
 
 class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
-    firstname = models.CharField(max_length=30, default="")
-    lastname = models.CharField(max_length=30, default="")
+    first_name = models.CharField(max_length=30, default="")
+    last_name = models.CharField(max_length=30, default="")
     email = models.EmailField(max_length=256, unique=True)
     password = models.CharField(max_length=256)
     role = models.CharField(

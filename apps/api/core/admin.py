@@ -7,15 +7,22 @@ from .models import Workspace
 
 
 @register(User)
-class UserAdmin(ModelAdmin):
-    list_display = ("id", "username", "email", "role", "firstname", "lastname")
+class UserAdmin(ModelAdmin):  # type: ignore
+    list_display = (
+        "id",
+        "username",
+        "email",
+        "role",
+        "first_name",
+        "last_name",
+    )
 
 
 @register(Website)
-class WebsiteAdmin(ModelAdmin):
+class WebsiteAdmin(ModelAdmin):  # type: ignore
     list_display = ("id", "name")
 
 
 @register(Workspace)
-class WorkspaceAdmin(ModelAdmin):
+class WorkspaceAdmin(ModelAdmin):  # type: ignore
     list_display = ("id", "name", "access_code", "created_by")

@@ -3,6 +3,7 @@ from django.contrib.auth import login
 from drf_spectacular.utils import extend_schema  # type: ignore
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -46,7 +47,7 @@ class UserViewSet(GenericViewSet):
             {"detail": "User created successfully."}, status=status.HTTP_200_OK
         )
 
-    @extend_schema(request=UserLoginIn, responses=GenericOut)
+    @extend_schema(request=UserLoginIn, responses=UserOut)
     @action(detail=False, methods=["post"], url_path="login")
     def login(self, request: Request):
         serializer = UserLoginIn(data=request.data)
@@ -62,9 +63,7 @@ class UserViewSet(GenericViewSet):
             )
 
         login(request, user)  # type: ignore
-        return Response(
-            {"user": UserOut(user).data}, status=status.HTTP_200_OK
-        )
+        return Response(UserOut(user).data, status=status.HTTP_200_OK)
 
     @extend_schema(responses=NeedSetupOut)
     @action(detail=False, methods=["get"], url_path="setup")
@@ -78,5 +77,20 @@ class UserViewSet(GenericViewSet):
 
         return Response(
             {"need_setup": True},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(responses=UserOut)
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="current",
+        permission_classes=[IsAuthenticated],
+    )
+    def current(self, request: Request):
+        serializer = UserOut(instance=request.user)  # type: ignore
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK,
         )

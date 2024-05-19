@@ -14,6 +14,10 @@ import {
 } from "@repo/ui";
 import { toast } from "@repo/ui";
 import { useNavigate } from "react-router";
+import Cookies from "js-cookie";
+import { client } from "@/lib/utils";
+
+const { POST } = client;
 
 const registerFormSchema = z.object({
   username: z
@@ -42,28 +46,39 @@ export default function RegisterForm() {
   async function onSubmit(formData: RegisterFormValues) {
     try {
       setLoading(true);
-      const response = await fetch("/api/users/register", {
+      const { response } = await POST("/api/users/register/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": Cookies.get("csrftoken") || "",
         },
-        body: JSON.stringify({
+        body: {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-        }),
+        },
       });
 
       if (response.ok) {
         toast({
           title: "Account Created",
         });
-        return navigate("/cool-space/dashboard");
+        return navigate("/");
       } else if (response.status === 400) {
         const data = await response.json();
-        if (data?.message) {
+        if (data?.detail) {
           return toast({
-            title: data?.message,
+            title: data?.detail,
+          });
+        }
+        if (data?.username) {
+          return toast({
+            title: data?.username[0],
+          });
+        }
+        if (data?.email) {
+          return toast({
+            title: data?.email[0],
           });
         }
       }

@@ -1,20 +1,48 @@
 import { create } from "zustand";
 
 interface UserState {
-  username: string;
-  firstname: string;
-  lastname: string;
-  setUser: (user: string, firstname: string, lastname: string) => void;
+  user: {
+    username: string;
+    firstname: string;
+    lastname: string;
+    role: string;
+    workspace: readonly string[];
+  };
+  setUser: (
+    username: string,
+    firstname: string,
+    lastname: string,
+    role: string,
+    workspace: readonly string[]
+  ) => void;
   clearUser: () => void;
 }
 
 const useUserStore = create<UserState>((set) => ({
-  username: "",
-  firstname: "",
-  lastname: "",
-  setUser: (username: string, firstname: string, lastname: string) =>
-    set({ username, firstname, lastname }),
-  clearUser: () => set({ username: "", firstname: "", lastname: "" }),
+  user: {
+    username: "",
+    firstname: "",
+    lastname: "",
+    role: "",
+    workspace: [],
+  },
+  setUser: (
+    username: string,
+    firstname: string,
+    lastname: string,
+    role: string,
+    workspace: readonly string[]
+  ) => set({ user: { username, firstname, lastname, role, workspace } }),
+  clearUser: () =>
+    set({
+      user: {
+        username: "",
+        firstname: "",
+        lastname: "",
+        role: "",
+        workspace: [],
+      },
+    }),
 }));
 
 export default useUserStore;

@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoutes />,
     children: [
       {
-        path: "app/:workspace/dashboard",
+        path: "app/:workspace/dashboard/",
         element: (
           <Suspense fallback={<p>Loading...</p>}>
             <p>hello</p>

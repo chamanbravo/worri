@@ -14,6 +14,11 @@ import {
 } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { toast } from "@repo/ui";
+import Cookies from "js-cookie";
+import useUserStore from "@/store/userStore";
+import { client } from "@/lib/utils";
+
+const { POST } = client;
 
 const loginFormSchema = z.object({
   username: z
@@ -29,6 +34,7 @@ type LoginFormValues = z.infer<typeof loginFormSchema>;
 export default function LoginForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -38,24 +44,31 @@ export default function LoginForm() {
   async function onSubmit(formData: LoginFormValues) {
     try {
       setLoading(true);
-      const response = await fetch("/api/users/login", {
-        method: "POST",
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+      const { response, data } = await POST("/api/users/login/", {
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": Cookies.get("csrftoken") || "",
+        },
+        body: {
+          username: formData.username,
+          password: formData.password,
         },
       });
 
-      if (response.ok) {
+      if (response.ok && data) {
         setLoading(false);
-        navigate("/cool-space/dashboard/");
+        setUser(
+          data.username,
+          data.first_name || "",
+          data.last_name || "",
+          data.role,
+          data.workspace
+        );
+        navigate(`app/${data.workspace[0]}/dashboard/`);
       } else if (response.status === 400) {
         const data = await response.json();
         return toast({
-          title: data?.message,
+          title: data?.detail,
         });
       }
     } catch (error) {

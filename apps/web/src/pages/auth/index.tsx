@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import lightRay from "@/assets/light-ray.png";
+import { client } from "@/lib/utils";
+
+const { GET } = client;
 
 export default function index() {
   const [needSetup, setNeedSetup] = useState<boolean | undefined>(undefined);
 
   const fetchNeedSetup = async () => {
     try {
-      const response = await fetch("/api/users/setup");
+      const { response, data } = await GET("/api/users/setup/");
       if (response.ok) {
-        const data = await response.json();
-        setNeedSetup(data?.needSetup);
+        setNeedSetup(data?.need_setup);
       }
     } catch (err) {
       console.error("Error fetching data:", err);

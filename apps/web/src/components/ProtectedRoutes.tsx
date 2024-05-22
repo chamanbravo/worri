@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
+import Navbar from "./Navbar/Navbar";
 import useUserStore from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { client } from "@/lib/utils";

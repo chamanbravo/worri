@@ -10,7 +10,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from .models import User
 from .models import Workspace
-from .serializers import GenericOut
+from .openapi_serializers import GenericOut
+from .openapi_serializers import RegisterErrorOut
 from .serializers import NeedSetupOut
 from .serializers import UserLoginIn
 from .serializers import UserOut
@@ -20,7 +21,13 @@ from .serializers import UserRegisterIn
 class UserViewSet(GenericViewSet):
     queryset = User.objects.all()
 
-    @extend_schema(request=UserRegisterIn, responses=GenericOut)
+    @extend_schema(
+        request=UserRegisterIn,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_400_BAD_REQUEST: RegisterErrorOut,
+        },
+    )
     @action(detail=False, methods=["post"], url_path="register")
     def register(self, request: Request):
         serializer = UserRegisterIn(data=request.data)
@@ -43,11 +50,18 @@ class UserViewSet(GenericViewSet):
         user.workspace.add(default_workspace)
         user.save()
 
+        login(request, user)  # type: ignore
         return Response(
             {"detail": "User created successfully."}, status=status.HTTP_200_OK
         )
 
-    @extend_schema(request=UserLoginIn, responses=UserOut)
+    @extend_schema(
+        request=UserLoginIn,
+        responses={
+            status.HTTP_200_OK: UserOut,
+            status.HTTP_400_BAD_REQUEST: GenericOut,
+        },
+    )
     @action(detail=False, methods=["post"], url_path="login")
     def login(self, request: Request):
         serializer = UserLoginIn(data=request.data)

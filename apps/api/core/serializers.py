@@ -10,10 +10,6 @@ from rest_framework.serializers import SerializerMethodField
 from .models import User
 
 
-class GenericOut(Serializer[Any]):
-    detail = CharField()
-
-
 class UserOut(ModelSerializer[User]):
     workspace = SerializerMethodField()
 

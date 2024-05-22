@@ -46,7 +46,7 @@ export default function RegisterForm() {
   async function onSubmit(formData: RegisterFormValues) {
     try {
       setLoading(true);
-      const { response } = await POST("/api/users/register/", {
+      const { response, error } = await POST("/api/users/register/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,22 +63,21 @@ export default function RegisterForm() {
         toast({
           title: "Account Created",
         });
-        return navigate("/");
+        return navigate("/app/cool-space/dashboard/");
       } else if (response.status === 400) {
-        const data = await response.json();
-        if (data?.detail) {
+        if (error?.detail) {
           return toast({
-            title: data?.detail,
+            title: error?.detail,
           });
         }
-        if (data?.username) {
+        if (error?.username) {
           return toast({
-            title: data?.username[0],
+            title: error?.username[0],
           });
         }
-        if (data?.email) {
+        if (error?.email) {
           return toast({
-            title: data?.email[0],
+            title: error?.email[0],
           });
         }
       }

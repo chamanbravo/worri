@@ -44,7 +44,7 @@ export default function LoginForm() {
   async function onSubmit(formData: LoginFormValues) {
     try {
       setLoading(true);
-      const { response, data } = await POST("/api/users/login/", {
+      const { response, data, error } = await POST("/api/users/login/", {
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": Cookies.get("csrftoken") || "",
@@ -65,13 +65,14 @@ export default function LoginForm() {
           data.workspace
         );
         navigate(`app/${data.workspace[0]}/dashboard/`);
-      } else if (response.status === 400) {
-        const data = await response.json();
+      } else if (response.status === 400 && error) {
         return toast({
-          title: data?.detail,
+          title: error?.detail,
         });
       }
     } catch (error) {
+      console.log(error);
+
       toast({ title: "Something went wrong." });
     } finally {
       setLoading(false);

@@ -5,7 +5,7 @@ import path, { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = "http://127.0.0.1:8000/";
 
 // https://vitejs.dev/config/
 export default defineConfig({

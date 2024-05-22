@@ -29,6 +29,12 @@ export interface components {
     NeedSetupOut: {
       need_setup: boolean;
     };
+    RegisterErrorOut: {
+      detail: string;
+      username: string[];
+      email: string[];
+      password: string[];
+    };
     /**
      * @description * `ADMIN` - ADMIN
      * * `EDITOR` - EDITOR
@@ -91,6 +97,11 @@ export interface operations {
           "application/json": components["schemas"]["UserOut"];
         };
       };
+      400: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
     };
   };
   users_register_create: {
@@ -103,6 +114,11 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["RegisterErrorOut"];
         };
       };
     };

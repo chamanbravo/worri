@@ -8,6 +8,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.serializers import SerializerMethodField
 
 from .models import User
+from .models import Workspace
 
 
 class UserOut(ModelSerializer[User]):
@@ -42,3 +43,9 @@ class UserLoginIn(Serializer[Any]):
 
 class NeedSetupOut(Serializer[Any]):
     need_setup = BooleanField()
+
+
+class WorkspaceOut(ModelSerializer[Workspace]):
+    class Meta:
+        model = Workspace
+        fields = ["name", "access_code"]

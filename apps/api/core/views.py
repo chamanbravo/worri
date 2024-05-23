@@ -3,6 +3,8 @@ from django.contrib.auth import login
 from drf_spectacular.utils import extend_schema  # type: ignore
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.mixins import RetrieveModelMixin
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -16,6 +18,7 @@ from .serializers import NeedSetupOut
 from .serializers import UserLoginIn
 from .serializers import UserOut
 from .serializers import UserRegisterIn
+from .serializers import WorkspaceOut
 
 
 class UserViewSet(GenericViewSet):
@@ -108,3 +111,10 @@ class UserViewSet(GenericViewSet):
             serializer.data,
             status=status.HTTP_200_OK,
         )
+
+
+class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+    queryset = Workspace.objects.all()
+    serializer_class = WorkspaceOut
+    lookup_field = "name"
+    http_method_names = ["get", "patch", "post"]

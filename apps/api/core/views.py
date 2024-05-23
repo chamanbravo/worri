@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
+from django.contrib.auth.hashers import make_password
 from drf_spectacular.utils import extend_schema  # type: ignore
 from rest_framework import status
 from rest_framework.decorators import action
@@ -18,16 +19,24 @@ from .models import Workspace
 from .openapi_serializers import GenericOut
 from .openapi_serializers import RegisterErrorOut
 from .openapi_serializers import WebsitesListOut
+from .openapi_serializers import WorkspaceMembersListOut
+from .permissions import IsAdminRole
+from .serializers import MemberUpdateParamIn
 from .serializers import NeedSetupOut
+from .serializers import UpdateWorkspaceMemberIn
 from .serializers import UserLoginIn
 from .serializers import UserOut
 from .serializers import UserRegisterIn
 from .serializers import WebsiteOut
+from .serializers import WorkspaceMemberOut
 from .serializers import WorkspaceOut
 
 
-class UserViewSet(GenericViewSet):
+class UserViewSet(GenericViewSet, RetrieveModelMixin):
     queryset = User.objects.all()
+    serializer_class = WorkspaceMemberOut
+    permission_classes = [IsAuthenticated]
+    lookup_field = "username"
 
     @extend_schema(
         request=UserRegisterIn,
@@ -36,7 +45,12 @@ class UserViewSet(GenericViewSet):
             status.HTTP_400_BAD_REQUEST: RegisterErrorOut,
         },
     )
-    @action(detail=False, methods=["post"], url_path="register")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="register",
+        permission_classes=[],
+    )
     def register(self, request: Request):
         serializer = UserRegisterIn(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -70,7 +84,9 @@ class UserViewSet(GenericViewSet):
             status.HTTP_400_BAD_REQUEST: GenericOut,
         },
     )
-    @action(detail=False, methods=["post"], url_path="login")
+    @action(
+        detail=False, methods=["post"], url_path="login", permission_classes=[]
+    )
     def login(self, request: Request):
         serializer = UserLoginIn(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -88,7 +104,9 @@ class UserViewSet(GenericViewSet):
         return Response(UserOut(user).data, status=status.HTTP_200_OK)
 
     @extend_schema(responses=NeedSetupOut)
-    @action(detail=False, methods=["get"], url_path="setup")
+    @action(
+        detail=False, methods=["get"], url_path="setup", permission_classes=[]
+    )
     def need_setup(self, request: Request):
         admin_user_exists = User.objects.filter(role="ADMIN").exists()
         if admin_user_exists:
@@ -117,16 +135,73 @@ class UserViewSet(GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=UpdateWorkspaceMemberIn,
+        responses=GenericOut,
+        parameters=[MemberUpdateParamIn],
+    )
+    @action(
+        detail=False,
+        methods=["patch"],
+        url_path="update",
+        permission_classes=[IsAuthenticated, IsAdminRole],
+    )
+    def update_user(self, request: Request):
+        param_serializer = MemberUpdateParamIn(data=request.query_params)
+        param_serializer.is_valid(raise_exception=True)
+
+        body_serializer = UpdateWorkspaceMemberIn(data=request.data)
+        body_serializer.is_valid(raise_exception=True)
+
+        try:
+            user = User.objects.get(username=param_serializer.validated_data["username"])  # type: ignore
+
+            if "password" in body_serializer.validated_data:  # type: ignore
+                password: str = body_serializer.validated_data.pop("password")  # type: ignore
+                user.password = make_password(password)  # type: ignore
+
+            for attr, value in body_serializer.validated_data.items():  # type: ignore
+                setattr(user, attr, value)  # type: ignore
+
+            user.save()
+
+            return Response(
+                {"detail": "User updated successfully."},
+                status=status.HTTP_200_OK,
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
 
 class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     queryset = Workspace.objects.all()
     serializer_class = WorkspaceOut
     lookup_field = "name"
     http_method_names = ["get", "patch", "post"]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    @extend_schema(responses=WorkspaceMembersListOut)
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="members",
+        permission_classes=[IsAuthenticated],
+    )
+    def members(self, request: Request, *args: Any, **kwargs: Any):
+        workspace = self.get_object()
+        users = User.objects.filter(workspace__name=workspace).all()
+        return Response({"members": WorkspaceMemberOut(users, many=True).data})
 
     @extend_schema(responses=WebsitesListOut)
-    @action(detail=True, methods=["get"], url_path="websites")
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="websites",
+        permission_classes=[IsAuthenticated],
+    )
     def websites(self, request: Request, *args: Any, **kwargs: Any):
         workspace = self.get_object()
         websites = Website.objects.filter(workspace__name=workspace).all()

@@ -63,7 +63,7 @@ export default function RegisterForm() {
         toast({
           title: "Account Created",
         });
-        return navigate("/");
+        return navigate("/app/cool-space/dashboard/");
       } else if (response.status === 400) {
         if (error?.detail) {
           return toast({

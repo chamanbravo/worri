@@ -5,6 +5,10 @@
 
 
 export interface paths {
+  "/api/users/{username}/": {
+    get: operations["users_retrieve"];
+    patch: operations["users_partial_update"];
+  };
   "/api/users/current/": {
     get: operations["users_current_retrieve"];
   };
@@ -25,6 +29,9 @@ export interface paths {
     get: operations["workspaces_retrieve"];
     patch: operations["workspaces_partial_update"];
   };
+  "/api/workspaces/{name}/members/": {
+    get: operations["workspaces_members_retrieve"];
+  };
   "/api/workspaces/{name}/websites/": {
     get: operations["workspaces_websites_retrieve"];
   };
@@ -44,6 +51,12 @@ export interface components {
       name?: string;
       domain?: string;
       created_by?: string;
+    };
+    PatchedWorkspaceMemberOutRequest: {
+      username?: string;
+      role?: components["schemas"]["RoleEnum"];
+      /** Format: date-time */
+      date_joined?: string;
     };
     PatchedWorkspaceOutRequest: {
       name?: string;
@@ -91,6 +104,16 @@ export interface components {
     WebsitesListOut: {
       websites: components["schemas"]["WebsiteOut"][];
     };
+    WorkspaceMemberOut: {
+      id: number;
+      username: string;
+      role: components["schemas"]["RoleEnum"];
+      /** Format: date-time */
+      date_joined?: string;
+    };
+    WorkspaceMembersListOut: {
+      members: components["schemas"]["WorkspaceMemberOut"][];
+    };
     WorkspaceOut: {
       name: string;
       access_code: string;
@@ -109,6 +132,39 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  users_retrieve: {
+    parameters: {
+      path: {
+        username: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceMemberOut"];
+        };
+      };
+    };
+  };
+  users_partial_update: {
+    parameters: {
+      path: {
+        username: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWorkspaceMemberOutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceMemberOut"];
+        };
+      };
+    };
+  };
   users_current_retrieve: {
     responses: {
       200: {
@@ -229,6 +285,20 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["WorkspaceOut"];
+        };
+      };
+    };
+  };
+  workspaces_members_retrieve: {
+    parameters: {
+      path: {
+        name: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceMembersListOut"];
         };
       };
     };

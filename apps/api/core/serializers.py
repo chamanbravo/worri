@@ -58,3 +58,19 @@ class WebsiteOut(ModelSerializer[Workspace]):
     class Meta:
         model = Website
         fields = ["id", "name", "domain", "created_by"]
+
+
+class WorkspaceMemberOut(ModelSerializer[User]):
+    class Meta:
+        model = User
+        fields = ["id", "username", "role", "date_joined"]
+
+
+class UpdateWorkspaceMemberIn(ModelSerializer[User]):
+    class Meta:
+        model = User
+        fields = ["password", "role"]
+
+
+class MemberUpdateParamIn(Serializer[Any]):
+    username = CharField()

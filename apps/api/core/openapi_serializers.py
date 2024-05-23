@@ -3,6 +3,7 @@ from rest_framework.serializers import ListSerializer
 from rest_framework.serializers import Serializer
 
 from .serializers import WebsiteOut
+from .serializers import WorkspaceMemberOut
 
 
 class GenericOut(Serializer):
@@ -17,3 +18,7 @@ class RegisterErrorOut(GenericOut):
 
 class WebsitesListOut(Serializer):
     websites = ListSerializer(child=WebsiteOut())
+
+
+class WorkspaceMembersListOut(Serializer):
+    members = ListSerializer(child=WorkspaceMemberOut())

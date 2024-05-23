@@ -17,6 +17,10 @@ export interface paths {
   "/api/users/setup/": {
     get: operations["users_setup_retrieve"];
   };
+  "/api/workspaces/{name}/": {
+    get: operations["workspaces_retrieve"];
+    patch: operations["workspaces_partial_update"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -28,6 +32,10 @@ export interface components {
     };
     NeedSetupOut: {
       need_setup: boolean;
+    };
+    PatchedWorkspaceOutRequest: {
+      name?: string;
+      access_code?: string;
     };
     RegisterErrorOut: {
       detail: string;
@@ -61,6 +69,10 @@ export interface components {
       /** Format: email */
       email: string;
       password: string;
+    };
+    WorkspaceOut: {
+      name: string;
+      access_code: string;
     };
   };
   responses: never;
@@ -128,6 +140,39 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["NeedSetupOut"];
+        };
+      };
+    };
+  };
+  workspaces_retrieve: {
+    parameters: {
+      path: {
+        name: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceOut"];
+        };
+      };
+    };
+  };
+  workspaces_partial_update: {
+    parameters: {
+      path: {
+        name: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWorkspaceOutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceOut"];
         };
       };
     };

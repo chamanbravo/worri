@@ -5,6 +5,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 import PublicRoutes from "./components/PublicRoutes";
 
 const Auth = lazy(() => import("@/pages/auth"));
+const Settings = lazy(() => import("@/pages/settings"));
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,30 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<p>Loading...</p>}>
             <p>hello</p>
+          </Suspense>
+        ),
+      },
+      {
+        path: "app/:workspace/settings/workspaces/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Settings />
+          </Suspense>
+        ),
+      },
+      {
+        path: "app/:workspace/settings/websites/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Settings />
+          </Suspense>
+        ),
+      },
+      {
+        path: "app/:workspace/settings/members/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Settings />
           </Suspense>
         ),
       },

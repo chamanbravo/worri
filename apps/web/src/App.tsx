@@ -49,6 +49,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "app/:workspace/settings/websites/:id/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Settings />
+          </Suspense>
+        ),
+      },
+      {
         path: "app/:workspace/settings/members/",
         element: (
           <Suspense fallback={<p></p>}>

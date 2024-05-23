@@ -17,9 +17,16 @@ export interface paths {
   "/api/users/setup/": {
     get: operations["users_setup_retrieve"];
   };
+  "/api/websites/{id}/": {
+    get: operations["websites_retrieve"];
+    patch: operations["websites_partial_update"];
+  };
   "/api/workspaces/{name}/": {
     get: operations["workspaces_retrieve"];
     patch: operations["workspaces_partial_update"];
+  };
+  "/api/workspaces/{name}/websites/": {
+    get: operations["workspaces_websites_retrieve"];
   };
 }
 
@@ -32,6 +39,11 @@ export interface components {
     };
     NeedSetupOut: {
       need_setup: boolean;
+    };
+    PatchedWebsiteOutRequest: {
+      name?: string;
+      domain?: string;
+      created_by?: string;
     };
     PatchedWorkspaceOutRequest: {
       name?: string;
@@ -69,6 +81,15 @@ export interface components {
       /** Format: email */
       email: string;
       password: string;
+    };
+    WebsiteOut: {
+      id: number;
+      name: string;
+      domain: string;
+      created_by: string;
+    };
+    WebsitesListOut: {
+      websites: components["schemas"]["WebsiteOut"][];
     };
     WorkspaceOut: {
       name: string;
@@ -144,6 +165,41 @@ export interface operations {
       };
     };
   };
+  websites_retrieve: {
+    parameters: {
+      path: {
+        /** @description A unique integer value identifying this website. */
+        id: number;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebsiteOut"];
+        };
+      };
+    };
+  };
+  websites_partial_update: {
+    parameters: {
+      path: {
+        /** @description A unique integer value identifying this website. */
+        id: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWebsiteOutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebsiteOut"];
+        };
+      };
+    };
+  };
   workspaces_retrieve: {
     parameters: {
       path: {
@@ -173,6 +229,20 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["WorkspaceOut"];
+        };
+      };
+    };
+  };
+  workspaces_websites_retrieve: {
+    parameters: {
+      path: {
+        name: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebsitesListOut"];
         };
       };
     };

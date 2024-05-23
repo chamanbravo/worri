@@ -41,7 +41,7 @@ export default function PublicRoutes() {
   }
 
   if (user?.username) {
-    return <Navigate to="app/cool-space/dashboard/" replace />;
+    return <Navigate to={`app/${user.workspace[0]}/dashboard/`} replace />;
   }
 
   return (

@@ -8,3 +8,4 @@ export * from "./components/ui/use-toast";
 export * from "./components/ui/form";
 export * from "./components/ui/dropdown-menu";
 export * from "./components/ui/separator";
+export * from "./components/ui/table";

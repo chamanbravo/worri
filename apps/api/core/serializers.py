@@ -8,6 +8,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.serializers import SerializerMethodField
 
 from .models import User
+from .models import Website
 from .models import Workspace
 
 
@@ -49,3 +50,11 @@ class WorkspaceOut(ModelSerializer[Workspace]):
     class Meta:
         model = Workspace
         fields = ["name", "access_code"]
+
+
+class WebsiteOut(ModelSerializer[Workspace]):
+    created_by = CharField(source="created_by.username")
+
+    class Meta:
+        model = Website
+        fields = ["id", "name", "domain", "created_by"]

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
 from drf_spectacular.utils import extend_schema  # type: ignore
@@ -11,13 +13,16 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from .models import User
+from .models import Website
 from .models import Workspace
 from .openapi_serializers import GenericOut
 from .openapi_serializers import RegisterErrorOut
+from .openapi_serializers import WebsitesListOut
 from .serializers import NeedSetupOut
 from .serializers import UserLoginIn
 from .serializers import UserOut
 from .serializers import UserRegisterIn
+from .serializers import WebsiteOut
 from .serializers import WorkspaceOut
 
 
@@ -118,3 +123,18 @@ class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     serializer_class = WorkspaceOut
     lookup_field = "name"
     http_method_names = ["get", "patch", "post"]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=WebsitesListOut)
+    @action(detail=True, methods=["get"], url_path="websites")
+    def websites(self, request: Request, *args: Any, **kwargs: Any):
+        workspace = self.get_object()
+        websites = Website.objects.filter(workspace__name=workspace).all()
+        return Response({"websites": WebsiteOut(websites, many=True).data})
+
+
+class WebsiteViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+    queryset = Website.objects.all()
+    serializer_class = WebsiteOut
+    http_method_names = ["get", "patch"]
+    permission_classes = [IsAuthenticated]

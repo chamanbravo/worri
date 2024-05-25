@@ -11,32 +11,25 @@ import {
 } from "@ui/index";
 import { Button } from "@ui/index";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 const { GET } = client;
 
-export default function MembersTable() {
+export default function WorkspaceTable() {
   const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
-  const [websites, setWebsites] = useState<
-    components["schemas"]["WorkspaceMemberOut"][]
+  const [workspaces, setWorkspaces] = useState<
+    components["schemas"]["WorkspacesOut"][]
   >([]);
 
-  const fetchWebsites = async (signal: AbortSignal) => {
+  const fetchWorkspaces = async (signal: AbortSignal) => {
     try {
-      if (!workspace) return;
-      const { response, data } = await GET("/api/workspaces/{name}/members/", {
+      const { response, data } = await GET("/api/users/workspaces/", {
         signal,
-        params: {
-          path: {
-            name: workspace,
-          },
-        },
       });
 
       if (response.ok && data) {
-        setWebsites(data?.members);
+        setWorkspaces(data?.workspaces);
       }
     } catch {
       //
@@ -46,40 +39,42 @@ export default function MembersTable() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    fetchWebsites(signal);
+    fetchWorkspaces(signal);
     return () => controller.abort();
   }, []);
 
   return (
     <>
-      {websites?.length ? (
+      {workspace?.length ? (
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead>Username</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Date Joined</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Created By</TableHead>
+              <TableHead>Websites</TableHead>
+              <TableHead>Members</TableHead>
+              <TableHead>Access Code</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {websites?.map((w, i) => {
+            {workspaces?.map((w, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
-                  <TableCell className="font-medium">{w.username}</TableCell>
-                  <TableCell>{w.role}</TableCell>
-                  <TableCell>
-                    {w.date_joined && new Date(w.date_joined).toDateString()}
-                  </TableCell>
+                  <TableCell className="font-medium">{w.name}</TableCell>
+                  <TableCell>{w.created_by}</TableCell>
+                  <TableCell>{w.websites_count}</TableCell>
+                  <TableCell>{w.members_count}</TableCell>
+                  <TableCell>{w.access_code}</TableCell>
                   <TableCell className="flex items-center justify-end gap-2">
-                    {w.username === user.username ? (
+                    {user.role !== "ADMIN" ? (
                       <Button variant="secondary" disabled>
                         Edit
                       </Button>
                     ) : (
                       <Button variant="secondary" asChild>
                         <Link
-                          to={`/app/${workspace}/settings/members/${w.username}/`}
+                          to={`/app/${workspace}/settings/workspaces/${w.name}/`}
                         >
                           Edit
                         </Link>

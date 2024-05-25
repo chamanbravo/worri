@@ -19,6 +19,7 @@ from .models import Workspace
 from .openapi_serializers import GenericOut
 from .openapi_serializers import RegisterErrorOut
 from .openapi_serializers import WebsitesListOut
+from .openapi_serializers import WorkspaceListOut
 from .openapi_serializers import WorkspaceMembersListOut
 from .permissions import IsAdminRole
 from .serializers import MemberUpdateParamIn
@@ -30,6 +31,7 @@ from .serializers import UserRegisterIn
 from .serializers import WebsiteOut
 from .serializers import WorkspaceMemberOut
 from .serializers import WorkspaceOut
+from .serializers import WorkspacesOut
 
 
 class UserViewSet(GenericViewSet, RetrieveModelMixin):
@@ -174,6 +176,23 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
                 {"detail": "User not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    @extend_schema(responses=WorkspaceListOut)
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="workspaces",
+        permission_classes=[IsAuthenticated],
+    )
+    def workspaces(self, request: Request):
+        user = request.user
+        workspaces: WorkspacesOut = user.workspace.all()
+        serializer = WorkspacesOut(workspaces, many=True)
+
+        return Response(
+            {"workspaces": serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):

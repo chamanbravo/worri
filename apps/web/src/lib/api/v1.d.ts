@@ -7,7 +7,6 @@
 export interface paths {
   "/api/users/{username}/": {
     get: operations["users_retrieve"];
-    patch: operations["users_partial_update"];
   };
   "/api/users/current/": {
     get: operations["users_current_retrieve"];
@@ -20,6 +19,12 @@ export interface paths {
   };
   "/api/users/setup/": {
     get: operations["users_setup_retrieve"];
+  };
+  "/api/users/update/": {
+    patch: operations["users_update_partial_update"];
+  };
+  "/api/users/workspaces/": {
+    get: operations["users_workspaces_retrieve"];
   };
   "/api/websites/{id}/": {
     get: operations["websites_retrieve"];
@@ -47,16 +52,14 @@ export interface components {
     NeedSetupOut: {
       need_setup: boolean;
     };
+    PatchedUpdateWorkspaceMemberInRequest: {
+      password?: string;
+      role?: components["schemas"]["RoleEnum"];
+    };
     PatchedWebsiteOutRequest: {
       name?: string;
       domain?: string;
       created_by?: string;
-    };
-    PatchedWorkspaceMemberOutRequest: {
-      username?: string;
-      role?: components["schemas"]["RoleEnum"];
-      /** Format: date-time */
-      date_joined?: string;
     };
     PatchedWorkspaceOutRequest: {
       name?: string;
@@ -104,6 +107,9 @@ export interface components {
     WebsitesListOut: {
       websites: components["schemas"]["WebsiteOut"][];
     };
+    WorkspaceListOut: {
+      workspaces: components["schemas"]["WorkspacesOut"][];
+    };
     WorkspaceMemberOut: {
       id: number;
       username: string;
@@ -117,6 +123,13 @@ export interface components {
     WorkspaceOut: {
       name: string;
       access_code: string;
+    };
+    WorkspacesOut: {
+      name: string;
+      access_code: string;
+      created_by: string;
+      members_count: string;
+      websites_count: string;
     };
   };
   responses: never;
@@ -136,25 +149,6 @@ export interface operations {
     parameters: {
       path: {
         username: string;
-      };
-    };
-    responses: {
-      200: {
-        content: {
-          "application/json": components["schemas"]["WorkspaceMemberOut"];
-        };
-      };
-    };
-  };
-  users_partial_update: {
-    parameters: {
-      path: {
-        username: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["PatchedWorkspaceMemberOutRequest"];
       };
     };
     responses: {
@@ -217,6 +211,34 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["NeedSetupOut"];
+        };
+      };
+    };
+  };
+  users_update_partial_update: {
+    parameters: {
+      query: {
+        username: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedUpdateWorkspaceMemberInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+    };
+  };
+  users_workspaces_retrieve: {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["WorkspaceListOut"];
         };
       };
     };

@@ -4,6 +4,7 @@ from rest_framework.serializers import Serializer
 
 from .serializers import WebsiteOut
 from .serializers import WorkspaceMemberOut
+from .serializers import WorkspacesOut
 
 
 class GenericOut(Serializer):
@@ -22,3 +23,7 @@ class WebsitesListOut(Serializer):
 
 class WorkspaceMembersListOut(Serializer):
     members = ListSerializer(child=WorkspaceMemberOut())
+
+
+class WorkspaceListOut(Serializer):
+    workspaces = ListSerializer(child=WorkspacesOut())

@@ -16,12 +16,15 @@ from rest_framework.viewsets import GenericViewSet
 from .models import User
 from .models import Website
 from .models import Workspace
+from .openapi_serializers import CreateWorkspaceErrorOut
 from .openapi_serializers import GenericOut
 from .openapi_serializers import RegisterErrorOut
 from .openapi_serializers import WebsitesListOut
 from .openapi_serializers import WorkspaceListOut
 from .openapi_serializers import WorkspaceMembersListOut
 from .permissions import IsAdminRole
+from .serializers import CreateWorkspaceIn
+from .serializers import JoinWorkspaceIn
 from .serializers import MemberUpdateParamIn
 from .serializers import NeedSetupOut
 from .serializers import UpdateWorkspaceMemberIn
@@ -201,6 +204,71 @@ class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     lookup_field = "name"
     http_method_names = ["get", "patch", "post"]
     permission_classes = [IsAuthenticated, IsAdminRole]
+
+    @extend_schema(
+        request=CreateWorkspaceIn,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_400_BAD_REQUEST: CreateWorkspaceErrorOut,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create",
+        permission_classes=[IsAuthenticated, IsAdminRole],
+    )
+    def create_workspace(self, request: Request):
+        serializer = CreateWorkspaceIn(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        workspace = Workspace.objects.create(
+            name=serializer.validated_data["name"],  # type: ignore
+            created_by=request.user,
+            access_code="hahaha",
+        )
+
+        user = request.user
+        user.workspace.add(workspace)
+        user.save
+
+        return Response(
+            {"detail": "Workspace created successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=JoinWorkspaceIn,
+        responses=GenericOut,
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="join",
+        permission_classes=[IsAuthenticated],
+    )
+    def join_workspace(self, request: Request):
+        serializer = JoinWorkspaceIn(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            workspace = Workspace.objects.get(
+                access_code=serializer.validated_data["access_code"],  # type: ignore
+            )
+        except Workspace.DoesNotExist:
+            return Response(
+                {"detail": "Workspace not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = request.user
+        user.workspace.add(workspace)
+        user.save
+
+        return Response(
+            {"detail": "Workspace joined successfully."},
+            status=status.HTTP_200_OK,
+        )
 
     @extend_schema(responses=WorkspaceMembersListOut)
     @action(

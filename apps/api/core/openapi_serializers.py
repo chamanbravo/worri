@@ -27,3 +27,7 @@ class WorkspaceMembersListOut(Serializer):
 
 class WorkspaceListOut(Serializer):
     workspaces = ListSerializer(child=WorkspacesOut())
+
+
+class CreateWorkspaceErrorOut(Serializer):
+    name = ListSerializer(child=CharField())

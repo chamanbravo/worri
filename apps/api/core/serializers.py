@@ -52,6 +52,16 @@ class WorkspaceOut(ModelSerializer[Workspace]):
         fields = ["name", "access_code"]
 
 
+class CreateWorkspaceIn(ModelSerializer[Workspace]):
+    class Meta:
+        model = Workspace
+        fields = ["name"]
+
+
+class JoinWorkspaceIn(Serializer[Any]):
+    access_code = CharField()
+
+
 class WorkspacesOut(ModelSerializer[Workspace]):
     created_by = CharField(source="created_by.username")
     websites_count = SerializerMethodField()

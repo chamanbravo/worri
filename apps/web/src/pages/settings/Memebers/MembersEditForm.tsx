@@ -59,18 +59,19 @@ export default function MembersEditForm() {
     try {
       if (!username) return;
       setLoading(true);
-      const { response } = await PATCH("/api/users/{username}/", {
+      const { response } = await PATCH("/api/users/update/", {
         headers: {
           "Content-Type": "application/json",
           "x-csrftoken": Cookies.get("csrftoken") || "",
         },
         params: {
-          path: {
+          query: {
             username: username,
           },
         },
         body: {
           role: formData.role,
+          password: formData.password,
         },
       });
       if (response.ok) {

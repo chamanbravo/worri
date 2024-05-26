@@ -12,6 +12,8 @@ import {
 import { Button } from "@ui/index";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { CreateWorkspaceDialog } from "./CreateWorkspace";
+import { JoinWorkspaceDialog } from "./JoinWorkspace";
 
 const { GET } = client;
 
@@ -21,6 +23,7 @@ export default function WorkspaceTable() {
   const [workspaces, setWorkspaces] = useState<
     components["schemas"]["WorkspacesOut"][]
   >([]);
+  const [refetch, setRefetch] = useState<boolean>(false);
 
   const fetchWorkspaces = async (signal: AbortSignal) => {
     try {
@@ -41,10 +44,16 @@ export default function WorkspaceTable() {
     const signal = controller.signal;
     fetchWorkspaces(signal);
     return () => controller.abort();
-  }, []);
+  }, [refetch]);
 
   return (
     <>
+      <div className="flex justify-end w-full">
+        <div className="inline-flex gap-2">
+          <JoinWorkspaceDialog refetch={() => setRefetch((prev) => !prev)} />
+          <CreateWorkspaceDialog refetch={() => setRefetch((prev) => !prev)} />
+        </div>
+      </div>
       {workspace?.length ? (
         <Table>
           <TableHeader>

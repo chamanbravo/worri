@@ -42,7 +42,7 @@ const workspaceFormSchema = z.object({
 type WorkspaceFormValues = z.infer<typeof workspaceFormSchema>;
 
 export default function WorkspaceEditForm() {
-  const { editWorkspaceName } = useParams();
+  const { editWorkspaceName, workspace } = useParams();
   const [loading, setLoading] = useState(false);
 
   const form = useForm<WorkspaceFormValues>({
@@ -74,6 +74,11 @@ export default function WorkspaceEditForm() {
       });
       if (response.ok) {
         toast({ title: "Workspace updated successfully." });
+        window.history.replaceState(
+          null,
+          "",
+          `/app/${workspace}/settings/workspaces/${formData.name}/`
+        );
       }
       setLoading(false);
     } catch {

@@ -40,14 +40,29 @@ export interface paths {
   "/api/workspaces/{name}/websites/": {
     get: operations["workspaces_websites_retrieve"];
   };
+  "/api/workspaces/create/": {
+    post: operations["workspaces_create_create"];
+  };
+  "/api/workspaces/join/": {
+    post: operations["workspaces_join_create"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    CreateWorkspaceErrorOut: {
+      name: string[];
+    };
+    CreateWorkspaceInRequest: {
+      name: string;
+    };
     GenericOut: {
       detail: string;
+    };
+    JoinWorkspaceInRequest: {
+      access_code: string;
     };
     NeedSetupOut: {
       need_setup: boolean;
@@ -335,6 +350,39 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["WebsitesListOut"];
+        };
+      };
+    };
+  };
+  workspaces_create_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateWorkspaceInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["CreateWorkspaceErrorOut"];
+        };
+      };
+    };
+  };
+  workspaces_join_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JoinWorkspaceInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
         };
       };
     };

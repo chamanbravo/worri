@@ -31,6 +31,7 @@ from .serializers import UpdateWorkspaceMemberIn
 from .serializers import UserLoginIn
 from .serializers import UserOut
 from .serializers import UserRegisterIn
+from .serializers import WebsiteIn
 from .serializers import WebsiteOut
 from .serializers import WorkspaceMemberOut
 from .serializers import WorkspaceOut
@@ -298,5 +299,35 @@ class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
 class WebsiteViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     queryset = Website.objects.all()
     serializer_class = WebsiteOut
-    http_method_names = ["get", "patch"]
+    http_method_names = ["get", "patch", "post"]
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=WebsiteIn,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_400_BAD_REQUEST: GenericOut,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create",
+        permission_classes=[IsAuthenticated, IsAdminRole],
+    )
+    def websites(self, request: Request, *args: Any, **kwargs: Any):
+        serializer = WebsiteIn(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            workspace = Workspace.objects.get(name=serializer.validated_data["workspace"]["name"])  # type: ignore
+        except Workspace.DoesNotExist:
+            return Response({"detail": "Workspace not found."})
+
+        Website.objects.create(
+            name=serializer.validated_data["name"],  # type: ignore
+            domain=serializer.validated_data["domain"],  # type: ignore
+            workspace=workspace,
+            created_by=request.user,
+        )
+        return Response({"detail": "Website added successfully."})

@@ -84,6 +84,14 @@ class WorkspacesOut(ModelSerializer[Workspace]):
         return User.objects.filter(workspace=obj).count()
 
 
+class WebsiteIn(ModelSerializer[Workspace]):
+    workspace = CharField(source="workspace.name")
+
+    class Meta:
+        model = Website
+        fields = ["workspace", "name", "domain"]
+
+
 class WebsiteOut(ModelSerializer[Workspace]):
     created_by = CharField(source="created_by.username")
 

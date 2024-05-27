@@ -30,6 +30,9 @@ export interface paths {
     get: operations["websites_retrieve"];
     patch: operations["websites_partial_update"];
   };
+  "/api/websites/create/": {
+    post: operations["websites_create_create"];
+  };
   "/api/workspaces/{name}/": {
     get: operations["workspaces_retrieve"];
     patch: operations["workspaces_partial_update"];
@@ -112,6 +115,11 @@ export interface components {
       /** Format: email */
       email: string;
       password: string;
+    };
+    WebsiteInRequest: {
+      workspace: string;
+      name: string;
+      domain: string;
     };
     WebsiteOut: {
       id: number;
@@ -289,6 +297,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["WebsiteOut"];
+        };
+      };
+    };
+  };
+  websites_create_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebsiteInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
         };
       };
     };

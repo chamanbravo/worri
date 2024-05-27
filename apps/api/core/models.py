@@ -53,7 +53,7 @@ class Website(BaseModel):
     name = models.CharField(max_length=32)
     domain = models.CharField(max_length=32)
     workspace = models.ForeignKey(
-        Workspace, on_delete=models.PROTECT, related_name="websites"
+        Workspace, on_delete=models.CASCADE, related_name="websites"
     )
     created_by = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="websites"

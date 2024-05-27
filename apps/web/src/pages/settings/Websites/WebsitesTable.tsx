@@ -12,6 +12,7 @@ import { Button } from "@ui/index";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
+import { CreateWebsiteDialog } from "./CreateWebsiteDialog";
 
 const { GET } = client;
 
@@ -20,6 +21,7 @@ export default function WebsitesTable() {
   const [websites, setWebsites] = useState<
     components["schemas"]["WebsiteOut"][]
   >([]);
+  const [refetch, setRefetch] = useState<boolean>();
 
   const fetchWebsites = async (signal: AbortSignal) => {
     try {
@@ -46,10 +48,15 @@ export default function WebsitesTable() {
     const signal = controller.signal;
     fetchWebsites(signal);
     return () => controller.abort();
-  }, []);
+  }, [refetch]);
 
   return (
     <>
+      <div className="flex justify-end w-full">
+        <div className="inline-flex gap-2">
+          <CreateWebsiteDialog refetch={() => setRefetch((prev) => !prev)} />
+        </div>
+      </div>
       {websites?.length ? (
         <Table>
           <TableHeader>

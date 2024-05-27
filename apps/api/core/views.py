@@ -28,6 +28,7 @@ from .serializers import JoinWorkspaceIn
 from .serializers import MemberUpdateParamIn
 from .serializers import NeedSetupOut
 from .serializers import UpdateWorkspaceMemberIn
+from .serializers import UserIn
 from .serializers import UserLoginIn
 from .serializers import UserOut
 from .serializers import UserRegisterIn
@@ -195,6 +196,41 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
         return Response(
             {"workspaces": serializer.data},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=UserIn,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_400_BAD_REQUEST: RegisterErrorOut,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="create",
+        permission_classes=[IsAuthenticated, IsAdminRole],
+    )
+    def create_user(self, request: Request):
+        serializer = UserIn(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            workspace = Workspace.objects.get(name=serializer.validated_data["workspace"])  # type: ignore
+        except Workspace.DoesNotExist:
+            return Response({"detail": "Workspace not found."})
+
+        user = User.objects.create_user(  # type: ignore
+            username=serializer.validated_data["username"],  # type: ignore
+            password=serializer.validated_data["password"],  # type: ignore
+            role=serializer.validated_data["role"],  # type: ignore
+        )
+        user.workspace.add(workspace)
+        user.save()
+
+        return Response(
+            {"detail": "User created successfully."},
             status=status.HTTP_200_OK,
         )
 

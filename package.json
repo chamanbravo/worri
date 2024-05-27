@@ -6,7 +6,9 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "update-schema": "npm run update-schema -w web"
+    "update-schema": "npm run update-schema -w web",
+    "api:migrations": "npm run make-migrations -w api",
+    "api:migrate": "npm run migrate -w api"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

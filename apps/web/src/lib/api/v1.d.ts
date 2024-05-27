@@ -8,6 +8,9 @@ export interface paths {
   "/api/users/{username}/": {
     get: operations["users_retrieve"];
   };
+  "/api/users/create/": {
+    post: operations["users_create_create"];
+  };
   "/api/users/current/": {
     get: operations["users_current_retrieve"];
   };
@@ -96,6 +99,12 @@ export interface components {
      * @enum {string}
      */
     RoleEnum: "ADMIN" | "EDITOR" | "VIEWER";
+    UserInRequest: {
+      username: string;
+      role: components["schemas"]["RoleEnum"];
+      password: string;
+      workspace: string;
+    };
     UserLoginInRequest: {
       username: string;
       password: string;
@@ -105,15 +114,21 @@ export interface components {
       first_name?: string;
       last_name?: string;
       username: string;
-      /** Format: email */
-      email: string;
+      /**
+       * Email address
+       * Format: email
+       */
+      email?: string;
       role: components["schemas"]["RoleEnum"];
       workspace: readonly string[];
     };
     UserRegisterInRequest: {
       username: string;
-      /** Format: email */
-      email: string;
+      /**
+       * Email address
+       * Format: email
+       */
+      email?: string;
       password: string;
     };
     WebsiteInRequest: {
@@ -178,6 +193,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["WorkspaceMemberOut"];
+        };
+      };
+    };
+  };
+  users_create_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["RegisterErrorOut"];
         };
       };
     };

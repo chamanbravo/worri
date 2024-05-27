@@ -13,6 +13,7 @@ import { Button } from "@ui/index";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
+import { CreateMemberDialog } from "./CreateMemberDialog";
 
 const { GET } = client;
 
@@ -22,6 +23,7 @@ export default function MembersTable() {
   const [websites, setWebsites] = useState<
     components["schemas"]["WorkspaceMemberOut"][]
   >([]);
+  const [refetch, setRefetch] = useState<boolean>(false);
 
   const fetchWebsites = async (signal: AbortSignal) => {
     try {
@@ -48,10 +50,15 @@ export default function MembersTable() {
     const signal = controller.signal;
     fetchWebsites(signal);
     return () => controller.abort();
-  }, []);
+  }, [refetch]);
 
   return (
     <>
+      <div className="flex justify-end w-full">
+        <div className="inline-flex gap-2">
+          <CreateMemberDialog refetch={() => setRefetch((prev) => !prev)} />
+        </div>
+      </div>
       {websites?.length ? (
         <Table>
           <TableHeader>

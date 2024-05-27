@@ -12,6 +12,14 @@ from .models import Website
 from .models import Workspace
 
 
+class UserIn(ModelSerializer[User]):
+    workspace = CharField()
+
+    class Meta:
+        model = User
+        fields = ["username", "role", "password", "workspace"]
+
+
 class UserOut(ModelSerializer[User]):
     workspace = SerializerMethodField()
 

@@ -351,10 +351,10 @@ class WorkspaceViewSet(
         return Response({"websites": WebsiteOut(websites, many=True).data})
 
 
-class WebsiteViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+class WebsiteViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin):
     queryset = Website.objects.all()
     serializer_class = WebsiteOut
-    http_method_names = ["get", "patch", "post"]
+    http_method_names = ["get", "patch", "post", "delete"]
     permission_classes = [IsAuthenticated]
 
     @extend_schema(

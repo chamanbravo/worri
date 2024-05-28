@@ -34,6 +34,7 @@ export interface paths {
   };
   "/api/websites/{id}/": {
     get: operations["websites_retrieve"];
+    delete: operations["websites_destroy"];
     patch: operations["websites_partial_update"];
   };
   "/api/websites/create/": {
@@ -325,6 +326,20 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["WebsiteOut"];
         };
+      };
+    };
+  };
+  websites_destroy: {
+    parameters: {
+      path: {
+        /** @description A unique integer value identifying this website. */
+        id: number;
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        content: never;
       };
     };
   };

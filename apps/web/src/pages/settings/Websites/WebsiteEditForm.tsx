@@ -1,5 +1,5 @@
 import { toast } from "@ui/index";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Button } from "@ui/index";
 import { Input } from "@ui/index";
 import {
@@ -16,8 +16,9 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { client } from "@/lib/utils";
 import Cookies from "js-cookie";
+import { DeleteConfirmation } from "@/components/DeleteConfirmation";
 
-const { GET, PATCH } = client;
+const { GET, PATCH, DELETE } = client;
 
 const websiteFormSchema = z.object({
   name: z
@@ -43,6 +44,8 @@ type WebsiteFormValues = z.infer<typeof websiteFormSchema>;
 export default function WebsiteEditForm() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { workspace } = useParams();
 
   const form = useForm<WebsiteFormValues>({
     resolver: zodResolver(websiteFormSchema),
@@ -101,6 +104,28 @@ export default function WebsiteEditForm() {
     }
   };
 
+  const deleteWebsite = async () => {
+    try {
+      if (!id) return;
+      const { response } = await DELETE("/api/websites/{id}/", {
+        headers: {
+          "Content-Type": "application/json",
+          "x-csrftoken": Cookies.get("csrftoken") || "",
+        },
+        params: {
+          path: {
+            id: +id,
+          },
+        },
+      });
+      if (response.ok) {
+        navigate(`/app/${workspace}/settings/websites/`);
+      }
+    } catch {
+      //
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -147,9 +172,12 @@ export default function WebsiteEditForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Submit"}
-        </Button>
+        <div className="inline-flex gap-2">
+          <Button type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Submit"}
+          </Button>
+          <DeleteConfirmation onDelete={deleteWebsite} buttonTitle="Delete" />
+        </div>
       </form>
     </Form>
   );

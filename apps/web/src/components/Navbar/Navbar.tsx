@@ -23,8 +23,10 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
-              to="#"
-              className={pathname === "/websites/" ? active : inactive}
+              to={`/app/${workspace}/websites/`}
+              className={
+                pathname.includes(`/${workspace}/websites/`) ? active : inactive
+              }
             >
               Websites
             </Link>

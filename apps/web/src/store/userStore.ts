@@ -16,6 +16,7 @@ interface UserState {
     workspace: readonly string[]
   ) => void;
   clearUser: () => void;
+  updateWorkspace: (workspace: readonly string[]) => void;
 }
 
 const useUserStore = create<UserState>((set) => ({
@@ -43,6 +44,8 @@ const useUserStore = create<UserState>((set) => ({
         workspace: [],
       },
     }),
+  updateWorkspace: (workspace: readonly string[]) =>
+    set((state) => ({ user: { ...state.user, workspace: workspace } })),
 }));
 
 export default useUserStore;

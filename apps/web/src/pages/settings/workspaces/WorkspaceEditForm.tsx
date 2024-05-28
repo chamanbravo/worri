@@ -16,7 +16,7 @@ import { client, generateRandomString } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { Copy } from "lucide-react";
 import { toast } from "@ui/index";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const { GET, PATCH } = client;
 
@@ -41,9 +41,15 @@ const workspaceFormSchema = z.object({
 
 type WorkspaceFormValues = z.infer<typeof workspaceFormSchema>;
 
-export default function WorkspaceEditForm() {
+interface Props {
+  refetch: () => void;
+}
+
+export default function WorkspaceEditForm({ refetch }: Props) {
   const { editWorkspaceName, workspace } = useParams();
   const [loading, setLoading] = useState(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<WorkspaceFormValues>({
     resolver: zodResolver(workspaceFormSchema),
@@ -74,11 +80,10 @@ export default function WorkspaceEditForm() {
       });
       if (response.ok) {
         toast({ title: "Workspace updated successfully." });
-        window.history.replaceState(
-          null,
-          "",
-          `/app/${workspace}/settings/workspaces/${formData.name}/`
+        navigate(
+          `/app/${currentWorkspace ? formData.name : workspace}/settings/workspaces/${formData.name}/`
         );
+        refetch();
       }
       setLoading(false);
     } catch {
@@ -111,6 +116,9 @@ export default function WorkspaceEditForm() {
     const controller = new AbortController();
     const signal = controller.signal;
     fetchWorkspaceInfo(signal);
+    if (workspace === editWorkspaceName) {
+      setCurrentWorkspace(true);
+    }
     return () => controller.abort();
   }, []);
 

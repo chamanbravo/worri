@@ -14,7 +14,7 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: (
-          <Suspense fallback={<p>Loading...</p>}>
+          <Suspense fallback={<p></p>}>
             <Auth />
           </Suspense>
         ),
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
       {
         path: "app/:workspace/dashboard/",
         element: (
-          <Suspense fallback={<p>Loading...</p>}>
+          <Suspense fallback={<p></p>}>
             <p>hello</p>
           </Suspense>
         ),

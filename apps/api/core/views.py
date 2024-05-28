@@ -2,7 +2,9 @@ from typing import Any
 
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
+from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password
+from django.http import HttpRequest
 from drf_spectacular.utils import extend_schema  # type: ignore
 from rest_framework import status
 from rest_framework.decorators import action
@@ -233,6 +235,20 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
             {"detail": "User created successfully."},
             status=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        request=None,
+        responses={status.HTTP_200_OK: GenericOut},
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="logout",
+        permission_classes=[IsAuthenticated],
+    )
+    def logout(self, request: HttpRequest):
+        logout(request)
+        return Response({"detail": "Successfully logged out."})
 
 
 class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):

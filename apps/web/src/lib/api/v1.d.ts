@@ -17,6 +17,9 @@ export interface paths {
   "/api/users/login/": {
     post: operations["users_login_create"];
   };
+  "/api/users/logout/": {
+    post: operations["users_logout_create"];
+  };
   "/api/users/register/": {
     post: operations["users_register_create"];
   };
@@ -238,6 +241,15 @@ export interface operations {
         };
       };
       400: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+    };
+  };
+  users_logout_create: {
+    responses: {
+      200: {
         content: {
           "application/json": components["schemas"]["GenericOut"];
         };

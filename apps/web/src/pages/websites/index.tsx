@@ -81,10 +81,15 @@ export default function index() {
           </TableBody>
         </Table>
       ) : (
-        <div className="flex items-center justify-center h-16 text-center">
+        <div className="flex flex-col items-center justify-center h-16 gap-2 text-center">
           <span className="pt-4 text-sm text-muted-foreground">
-            No data available.
+            You do not have any websites configured
           </span>
+          <Button variant="secondary" asChild>
+            <Link to={`/app/${workspace}/settings/websites/`}>
+              Go to settings
+            </Link>
+          </Button>
         </div>
       )}
     </div>

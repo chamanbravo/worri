@@ -17,8 +17,9 @@ import Cookies from "js-cookie";
 import { Copy } from "lucide-react";
 import { toast } from "@ui/index";
 import { useNavigate, useParams } from "react-router";
+import { DeleteConfirmation } from "@/components/DeleteConfirmation";
 
-const { GET, PATCH } = client;
+const { GET, PATCH, DELETE } = client;
 
 const workspaceFormSchema = z.object({
   name: z
@@ -112,6 +113,32 @@ export default function WorkspaceEditForm({ refetch }: Props) {
     }
   };
 
+  const deleteWorkspace = async () => {
+    try {
+      if (!editWorkspaceName) return;
+      const { response } = await DELETE("/api/workspaces/{name}/", {
+        headers: {
+          "Content-Type": "application/json",
+          "x-csrftoken": Cookies.get("csrftoken") || "",
+        },
+        params: {
+          path: {
+            name: editWorkspaceName,
+          },
+        },
+      });
+      if (response.ok) {
+        if (currentWorkspace) {
+          return navigate(`/`);
+        }
+        navigate(`/app/${workspace}/settings/workspaces/`);
+        refetch();
+      }
+    } catch {
+      //
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -184,9 +211,12 @@ export default function WorkspaceEditForm({ refetch }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Submit"}
-        </Button>
+        <div className="inline-flex gap-2">
+          <Button type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Submit"}
+          </Button>
+          <DeleteConfirmation onDelete={deleteWorkspace} buttonTitle="Delete" />
+        </div>
       </form>
     </Form>
   );

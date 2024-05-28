@@ -41,6 +41,7 @@ export interface paths {
   };
   "/api/workspaces/{name}/": {
     get: operations["workspaces_retrieve"];
+    delete: operations["workspaces_destroy"];
     patch: operations["workspaces_partial_update"];
   };
   "/api/workspaces/{name}/members/": {
@@ -377,6 +378,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["WorkspaceOut"];
         };
+      };
+    };
+  };
+  workspaces_destroy: {
+    parameters: {
+      path: {
+        name: string;
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        content: never;
       };
     };
   };

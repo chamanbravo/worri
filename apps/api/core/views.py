@@ -8,6 +8,7 @@ from django.http import HttpRequest
 from drf_spectacular.utils import extend_schema  # type: ignore
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.mixins import DestroyModelMixin
 from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -251,11 +252,13 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         return Response({"detail": "Successfully logged out."})
 
 
-class WorkspaceViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+class WorkspaceViewSet(
+    GenericViewSet, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
+):
     queryset = Workspace.objects.all()
     serializer_class = WorkspaceOut
     lookup_field = "name"
-    http_method_names = ["get", "patch", "post"]
+    http_method_names = ["get", "patch", "post", "delete"]
     permission_classes = [IsAuthenticated, IsAdminRole]
 
     @extend_schema(

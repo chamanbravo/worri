@@ -102,6 +102,7 @@ export function CreateMemberDialog({ refetch }: { refetch: () => void }) {
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full"
@@ -117,7 +118,7 @@ export function CreateMemberDialog({ refetch }: { refetch: () => void }) {
                 <Separator className="my-1" />
                 <SelectItem value="VIEWER">VIEWER</SelectItem>
                 <SelectItem value="EDITOR">EDITOR</SelectItem>
-                <SelectItem value="ADMIN">EDITOR</SelectItem>
+                <SelectItem value="ADMIN">ADMIN</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

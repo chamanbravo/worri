@@ -42,7 +42,7 @@ from .serializers import WorkspaceOut
 from .serializers import WorkspacesOut
 
 
-class UserViewSet(GenericViewSet, RetrieveModelMixin):
+class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
     queryset = User.objects.all()
     serializer_class = WorkspaceMemberOut
     permission_classes = [IsAuthenticated]
@@ -351,7 +351,9 @@ class WorkspaceViewSet(
         return Response({"websites": WebsiteOut(websites, many=True).data})
 
 
-class WebsiteViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin):
+class WebsiteViewSet(
+    GenericViewSet, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
+):
     queryset = Website.objects.all()
     serializer_class = WebsiteOut
     http_method_names = ["get", "patch", "post", "delete"]

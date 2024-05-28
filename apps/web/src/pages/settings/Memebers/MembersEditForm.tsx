@@ -1,5 +1,5 @@
 import { toast } from "@ui/index";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Button } from "@ui/index";
 import { Input } from "@ui/index";
 import {
@@ -23,8 +23,9 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { client } from "@/lib/utils";
 import Cookies from "js-cookie";
+import { DeleteConfirmation } from "@/components/DeleteConfirmation";
 
-const { GET, PATCH } = client;
+const { GET, PATCH, DELETE } = client;
 
 const websiteFormSchema = z.object({
   username: z
@@ -46,6 +47,8 @@ type WebsiteFormValues = z.infer<typeof websiteFormSchema>;
 export default function MembersEditForm() {
   const { username } = useParams();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { workspace } = useParams();
 
   const form = useForm<WebsiteFormValues>({
     resolver: zodResolver(websiteFormSchema),
@@ -104,6 +107,29 @@ export default function MembersEditForm() {
     }
   };
 
+  const deleteMember = async () => {
+    try {
+      if (!username) return;
+      const { response, data } = await DELETE("/api/users/{username}/", {
+        headers: {
+          "Content-Type": "application/json",
+          "x-csrftoken": Cookies.get("csrftoken") || "",
+        },
+        params: {
+          path: {
+            username: username,
+          },
+        },
+      });
+
+      if (response.ok && data) {
+        navigate(`/app/${workspace}/settings/members/`);
+      }
+    } catch {
+      //
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -139,7 +165,12 @@ export default function MembersEditForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input autoComplete="given-name" placeholder="" {...field} />
+                <Input
+                  type="password"
+                  autoComplete="given-name"
+                  placeholder=""
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,9 +198,12 @@ export default function MembersEditForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Submit"}
-        </Button>
+        <div className="inline-flex gap-2">
+          <Button type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Submit"}
+          </Button>
+          <DeleteConfirmation onDelete={deleteMember} buttonTitle="Delete" />
+        </div>
       </form>
     </Form>
   );

@@ -7,6 +7,7 @@
 export interface paths {
   "/api/users/{username}/": {
     get: operations["users_retrieve"];
+    delete: operations["users_destroy"];
   };
   "/api/users/create/": {
     post: operations["users_create_create"];
@@ -199,6 +200,19 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["WorkspaceMemberOut"];
         };
+      };
+    };
+  };
+  users_destroy: {
+    parameters: {
+      path: {
+        username: string;
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        content: never;
       };
     };
   };

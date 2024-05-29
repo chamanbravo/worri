@@ -13,11 +13,13 @@ import { Input } from "@ui/index";
 import { Label } from "@ui/index";
 import { useState } from "react";
 import Cookies from "js-cookie";
+import useUserStore from "@/store/userStore";
 
 const { POST } = client;
 
-export function JoinWorkspaceDialog({ refetch }: { refetch: () => void }) {
+export function JoinWorkspaceDialog() {
   const [accessCode, setAccessCode] = useState<string>("");
+  const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
   const onSubmit = async () => {
     try {
@@ -35,7 +37,7 @@ export function JoinWorkspaceDialog({ refetch }: { refetch: () => void }) {
         toast({
           title: "Workspace joined successfully.",
         });
-        refetch();
+        updateWorkspace();
       }
       if (!response.ok) {
         toast({

@@ -13,11 +13,13 @@ import { Input } from "@ui/index";
 import { Label } from "@ui/index";
 import { useState } from "react";
 import Cookies from "js-cookie";
+import useUserStore from "@/store/userStore";
 
 const { POST } = client;
 
-export function CreateWorkspaceDialog({ refetch }: { refetch: () => void }) {
+export function CreateWorkspaceDialog() {
   const [name, setName] = useState<string>("");
+  const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
   const onSubmit = async () => {
     try {
@@ -35,7 +37,7 @@ export function CreateWorkspaceDialog({ refetch }: { refetch: () => void }) {
         toast({
           title: "Workspace created successfully.",
         });
-        refetch();
+        updateWorkspace();
       }
       if (!response.ok) {
         toast({

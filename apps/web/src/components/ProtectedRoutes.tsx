@@ -45,6 +45,10 @@ export default function ProtectedRoutes() {
     return <Navigate to="/" replace />;
   }
 
+  if (user?.username && !user?.workspace?.length) {
+    return <Navigate to={`app/`} replace />;
+  }
+
   return (
     <div>
       <Navbar />

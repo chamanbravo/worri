@@ -2,6 +2,7 @@ import { cn } from "@ui/lib/utils";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { WorkspaceDropdown } from "./WorkspaceDropdown";
 import { UserDropdown } from "./UserDropdown";
+import useUserStore from "@/store/userStore";
 
 const active = "text-sm font-medium hover:text-foreground";
 const inactive = cn(active, "text-muted-foreground");
@@ -9,6 +10,7 @@ const inactive = cn(active, "text-muted-foreground");
 export default function Navbar() {
   const { pathname } = useLocation();
   const { workspace } = useParams();
+  const user = useUserStore((state) => state.user);
 
   return (
     <div className="border-b">
@@ -17,13 +19,23 @@ export default function Navbar() {
           <p className="font-medium">logo</p>
           <nav className={"flex items-center space-x-4 mx-6"}>
             <Link
-              to={`/app/${workspace}/dashboard/`}
-              className={pathname.includes("dashboard") ? active : inactive}
+              to={
+                user?.workspace?.length
+                  ? `/app/${workspace}/dashboard/`
+                  : "/app/"
+              }
+              className={
+                pathname.includes("dashboard" || "app") ? active : inactive
+              }
             >
               Dashboard
             </Link>
             <Link
-              to={`/app/${workspace}/websites/`}
+              to={
+                user?.workspace?.length
+                  ? `/app/${workspace}/websites/`
+                  : "/app/"
+              }
               className={
                 pathname.includes(`/${workspace}/websites/`) ? active : inactive
               }
@@ -31,7 +43,11 @@ export default function Navbar() {
               Websites
             </Link>
             <Link
-              to={`/app/${workspace}/settings/workspaces/`}
+              to={
+                user?.workspace?.length
+                  ? `/app/${workspace}/settings/workspaces/`
+                  : "/app/"
+              }
               className={pathname.includes("/settings/") ? active : inactive}
             >
               Settings
@@ -40,7 +56,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <WorkspaceDropdown />
+          {user.workspace.length ? <WorkspaceDropdown /> : null}
           <UserDropdown />
         </div>
       </div>

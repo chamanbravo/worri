@@ -3,8 +3,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "@repo/ui";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import PublicRoutes from "./components/PublicRoutes";
+import CheckWorkspacesRoutes from "./components/CheckWorkspacesRoutes";
 
 const Auth = lazy(() => import("@/pages/auth"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Websites = lazy(() => import("@/pages/websites"));
 const Settings = lazy(() => import("@/pages/settings"));
 
@@ -22,6 +24,20 @@ const router = createBrowserRouter([
       },
     ],
   },
+
+  {
+    element: <CheckWorkspacesRoutes />,
+    children: [
+      {
+        path: "app/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Dashboard />
+          </Suspense>
+        ),
+      },
+    ],
+  },
   {
     element: <ProtectedRoutes />,
     children: [
@@ -29,7 +45,7 @@ const router = createBrowserRouter([
         path: "app/:workspace/dashboard/",
         element: (
           <Suspense fallback={<p></p>}>
-            <p>hello</p>
+            <Dashboard />
           </Suspense>
         ),
       },

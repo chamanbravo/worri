@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
+import Navbar from "./Navbar/Navbar";
 import useUserStore from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { client } from "@/lib/utils";
 
 const { GET } = client;
 
-export default function PublicRoutes() {
+export default function CheckWorkspacesRoutes() {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const [loading, setLoading] = useState<boolean>(true);
@@ -40,16 +41,17 @@ export default function PublicRoutes() {
     return null;
   }
 
-  if (user?.username && !user?.workspace?.length) {
-    return <Navigate to={`app/`} replace />;
+  if (!user?.username) {
+    return <Navigate to="/" replace />;
   }
 
   if (user?.username && user?.workspace?.length) {
-    return <Navigate to={`app/${user.workspace[0]}/dashboard/`} replace />;
+    return <Navigate to={`app/${user?.workspace[0]}/dashboard/`} replace />;
   }
 
   return (
     <div>
+      <Navbar />
       <Outlet />
     </div>
   );

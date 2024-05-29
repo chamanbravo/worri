@@ -18,6 +18,7 @@ import { Copy } from "lucide-react";
 import { toast } from "@ui/index";
 import { useNavigate, useParams } from "react-router";
 import { DeleteConfirmation } from "@/components/DeleteConfirmation";
+import useUserStore from "@/store/userStore";
 
 const { GET, PATCH, DELETE } = client;
 
@@ -42,15 +43,12 @@ const workspaceFormSchema = z.object({
 
 type WorkspaceFormValues = z.infer<typeof workspaceFormSchema>;
 
-interface Props {
-  refetch: () => void;
-}
-
-export default function WorkspaceEditForm({ refetch }: Props) {
+export default function WorkspaceEditForm() {
   const { editWorkspaceName, workspace } = useParams();
   const [loading, setLoading] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState(false);
   const navigate = useNavigate();
+  const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
   const form = useForm<WorkspaceFormValues>({
     resolver: zodResolver(workspaceFormSchema),
@@ -84,7 +82,7 @@ export default function WorkspaceEditForm({ refetch }: Props) {
         navigate(
           `/app/${currentWorkspace ? formData.name : workspace}/settings/workspaces/${formData.name}/`
         );
-        refetch();
+        updateWorkspace();
       }
       setLoading(false);
     } catch {
@@ -132,7 +130,7 @@ export default function WorkspaceEditForm({ refetch }: Props) {
           return navigate(`/`);
         }
         navigate(`/app/${workspace}/settings/workspaces/`);
-        refetch();
+        updateWorkspace();
       }
     } catch {
       //

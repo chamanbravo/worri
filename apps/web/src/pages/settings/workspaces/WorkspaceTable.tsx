@@ -12,22 +12,47 @@ import { Link, useParams } from "react-router-dom";
 import { CreateWorkspaceDialog } from "./CreateWorkspace";
 import { JoinWorkspaceDialog } from "./JoinWorkspace";
 import { components } from "@/lib/api/v1";
+import { client } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
-interface Props {
-  refetch: () => void;
-  workspaces: components["schemas"]["WorkspacesOut"][];
-}
+const { GET } = client;
 
-export default function WorkspaceTable({ refetch, workspaces }: Props) {
+export default function WorkspaceTable() {
   const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
+  const updateWorkspaceList = useUserStore((state) => state.updateWorkspace);
+  const [workspaces, setWorkspaces] = useState<
+    components["schemas"]["WorkspacesOut"][]
+  >([]);
+
+  const fetchWorkspaces = async (signal: AbortSignal) => {
+    try {
+      const { response, data } = await GET("/api/users/workspaces/", {
+        signal,
+      });
+
+      if (response.ok && data?.workspaces?.length) {
+        setWorkspaces(data?.workspaces);
+        updateWorkspaceList();
+      }
+    } catch {
+      //
+    }
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    fetchWorkspaces(signal);
+    return () => controller.abort();
+  }, []);
 
   return (
     <>
       <div className="flex justify-end w-full">
         <div className="inline-flex gap-2">
-          <JoinWorkspaceDialog refetch={refetch} />
-          <CreateWorkspaceDialog refetch={refetch} />
+          <JoinWorkspaceDialog />
+          <CreateWorkspaceDialog />
         </div>
       </div>
       {workspace?.length ? (

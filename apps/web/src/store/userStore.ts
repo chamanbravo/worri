@@ -1,3 +1,4 @@
+import { components } from "@/lib/api/v1";
 import { create } from "zustand";
 
 interface UserState {
@@ -16,7 +17,7 @@ interface UserState {
     workspace: readonly string[]
   ) => void;
   clearUser: () => void;
-  updateWorkspace: (workspace: readonly string[]) => void;
+  updateWorkspace: () => void;
 }
 
 const useUserStore = create<UserState>((set) => ({
@@ -44,8 +45,14 @@ const useUserStore = create<UserState>((set) => ({
         workspace: [],
       },
     }),
-  updateWorkspace: (workspace: readonly string[]) =>
-    set((state) => ({ user: { ...state.user, workspace: workspace } })),
+  updateWorkspace: async () => {
+    const response = await fetch("/api/users/workspaces/");
+    const data: components["schemas"]["WorkspaceListOut"] =
+      await response.json();
+    set((state) => ({
+      user: { ...state.user, workspace: data?.workspaces?.map((i) => i.name) },
+    }));
+  },
 }));
 
 export default useUserStore;

@@ -19,6 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from .models import User
 from .models import Website
 from .models import Workspace
+from .openapi_serializers import ChangePasswordErrorOut
 from .openapi_serializers import CreateWorkspaceErrorOut
 from .openapi_serializers import GenericOut
 from .openapi_serializers import RegisterErrorOut
@@ -26,10 +27,12 @@ from .openapi_serializers import WebsitesListOut
 from .openapi_serializers import WorkspaceListOut
 from .openapi_serializers import WorkspaceMembersListOut
 from .permissions import IsAdminRole
+from .serializers import ChangePasswordOut
 from .serializers import CreateWorkspaceIn
 from .serializers import JoinWorkspaceIn
 from .serializers import MemberUpdateParamIn
 from .serializers import NeedSetupOut
+from .serializers import UpdateUserSerializer
 from .serializers import UpdateWorkspaceMemberIn
 from .serializers import UserIn
 from .serializers import UserLoginIn
@@ -250,6 +253,65 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
     def logout(self, request: HttpRequest):
         logout(request)
         return Response({"detail": "Successfully logged out."})
+
+    @extend_schema(
+        request=UpdateUserSerializer,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_403_FORBIDDEN: GenericOut,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="update-profile",
+        permission_classes=[IsAuthenticated],
+    )
+    def update_profile(self, request: Request):
+        serializer = UpdateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        for attr, value in serializer.validated_data.items():  # type: ignore
+            setattr(user, attr, value)  # type: ignore
+
+        user.save()
+
+        return Response(
+            {"detail": "Profile updated successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=ChangePasswordOut,
+        responses={
+            status.HTTP_200_OK: GenericOut,
+            status.HTTP_403_FORBIDDEN: GenericOut,
+            status.HTTP_400_BAD_REQUEST: ChangePasswordErrorOut,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="change-password",
+        permission_classes=[IsAuthenticated],
+    )
+    def change_password(self, request: Request):
+        serializer = ChangePasswordOut(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        new_password = serializer.validated_data["new_password"]  # type: ignore
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"detail": "Password changed successfully."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class WorkspaceViewSet(

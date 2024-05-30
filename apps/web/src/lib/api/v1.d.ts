@@ -9,6 +9,9 @@ export interface paths {
     get: operations["users_retrieve"];
     delete: operations["users_destroy"];
   };
+  "/api/users/change-password/": {
+    post: operations["users_change_password_create"];
+  };
   "/api/users/create/": {
     post: operations["users_create_create"];
   };
@@ -29,6 +32,9 @@ export interface paths {
   };
   "/api/users/update/": {
     patch: operations["users_update_partial_update"];
+  };
+  "/api/users/update-profile/": {
+    post: operations["users_update_profile_create"];
   };
   "/api/users/workspaces/": {
     get: operations["users_workspaces_retrieve"];
@@ -64,6 +70,15 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    ChangePasswordErrorOut: {
+      detail: string;
+      current_password: string[];
+      new_password: string[];
+    };
+    ChangePasswordOutRequest: {
+      current_password: string;
+      new_password: string;
+    };
     CreateWorkspaceErrorOut: {
       name: string[];
     };
@@ -105,6 +120,10 @@ export interface components {
      * @enum {string}
      */
     RoleEnum: "ADMIN" | "EDITOR" | "VIEWER";
+    UpdateUserRequest: {
+      first_name?: string;
+      last_name?: string;
+    };
     UserInRequest: {
       username: string;
       role: components["schemas"]["RoleEnum"];
@@ -216,6 +235,30 @@ export interface operations {
       };
     };
   };
+  users_change_password_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangePasswordOutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["ChangePasswordErrorOut"];
+        };
+      };
+      403: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+    };
+  };
   users_create_create: {
     requestBody: {
       content: {
@@ -313,6 +356,25 @@ export interface operations {
     };
     responses: {
       200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+    };
+  };
+  users_update_profile_create: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdateUserRequest"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["GenericOut"];
+        };
+      };
+      403: {
         content: {
           "application/json": components["schemas"]["GenericOut"];
         };

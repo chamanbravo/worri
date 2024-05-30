@@ -31,3 +31,8 @@ class WorkspaceListOut(Serializer):
 
 class CreateWorkspaceErrorOut(Serializer):
     name = ListSerializer(child=CharField())
+
+
+class ChangePasswordErrorOut(GenericOut):
+    current_password = ListSerializer(child=CharField())
+    new_password = ListSerializer(child=CharField())

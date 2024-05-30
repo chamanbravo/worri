@@ -9,6 +9,7 @@ const Auth = lazy(() => import("@/pages/auth"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Websites = lazy(() => import("@/pages/websites"));
 const Settings = lazy(() => import("@/pages/settings"));
+const Profile = lazy(() => import("@/pages/profile"));
 
 const router = createBrowserRouter([
   {
@@ -102,6 +103,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<p></p>}>
             <Settings />
+          </Suspense>
+        ),
+      },
+      {
+        path: "app/:workspace/profile/",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Profile />
+          </Suspense>
+        ),
+      },
+      {
+        path: "app/:workspace/profile/password-security",
+        element: (
+          <Suspense fallback={<p></p>}>
+            <Profile />
           </Suspense>
         ),
       },

@@ -11,12 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@ui/index";
 import { CircleUserRound, User, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 
 const { POST } = client;
 
 export function UserDropdown() {
+  const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
   const navigate = useNavigate();
@@ -52,8 +54,13 @@ export function UserDropdown() {
         <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="flex items-center gap-2">
-            <User size={16} /> Profile
+          <DropdownMenuItem asChild>
+            <Link
+              to={`/app/${workspace}/profile/`}
+              className="flex items-center gap-2"
+            >
+              <User size={16} /> Profile
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex items-center gap-2"

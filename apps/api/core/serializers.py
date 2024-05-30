@@ -6,6 +6,7 @@ from rest_framework.fields import CharField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import Serializer
 from rest_framework.serializers import SerializerMethodField
+from rest_framework.serializers import ValidationError
 
 from .models import User
 from .models import Website
@@ -122,3 +123,20 @@ class UpdateWorkspaceMemberIn(ModelSerializer[User]):
 
 class MemberUpdateParamIn(Serializer[Any]):
     username = CharField()
+
+
+class UpdateUserSerializer(ModelSerializer[User]):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name"]
+
+
+class ChangePasswordOut(Serializer):
+    current_password = CharField()
+    new_password = CharField()
+
+    def validate_current_password(self, value):  # type: ignore
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise ValidationError("Current password is incorrect.")
+        return value

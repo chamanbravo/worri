@@ -1,6 +1,6 @@
 import { client } from "@/lib/utils";
 import useUserStore from "@/store/userStore";
-import { Button, toast } from "@ui/index";
+import { Button } from "@ui/index";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { CircleUserRound, User, LogOut } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -22,26 +23,20 @@ export function UserDropdown() {
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
   const navigate = useNavigate();
-
-  const logout = async () => {
-    try {
-      const { response } = await POST(`/api/users/logout/`, {
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      return await POST(`/api/users/logout/`, {
         headers: {
           "Content-Type": "application/json",
           "x-csrftoken": Cookies.get("csrftoken") || "",
         },
       });
-
-      if (response.ok) {
-        clearUser();
-        navigate("/");
-      }
-    } catch (error) {
-      toast({
-        title: "Something went wrong!",
-      });
-    }
-  };
+    },
+    onSuccess: async () => {
+      clearUser();
+      navigate("/");
+    },
+  });
 
   return (
     <DropdownMenu>
@@ -64,7 +59,7 @@ export function UserDropdown() {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={logout}
+            onClick={() => mutate()}
           >
             <LogOut size={16} /> Logout
           </DropdownMenuItem>

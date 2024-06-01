@@ -14,15 +14,16 @@ import { Label } from "@ui/index";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import useUserStore from "@/store/userStore";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
-export function CreateWorkspaceDialog() {
+export function CreateWorkspaceDialog({ refetch }: { refetch: () => void }) {
   const [name, setName] = useState<string>("");
   const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
-  const onSubmit = async () => {
-    try {
+  const { mutate } = useMutation({
+    mutationFn: async () => {
       const { response, error } = await POST("/api/workspaces/create/", {
         headers: {
           "Content-Type": "application/json",
@@ -37,6 +38,7 @@ export function CreateWorkspaceDialog() {
         toast({
           title: "Workspace created successfully.",
         });
+        refetch();
         updateWorkspace();
       }
       if (!response.ok) {
@@ -44,9 +46,11 @@ export function CreateWorkspaceDialog() {
           title: error?.name[0],
         });
       }
-    } catch (error) {
-      //
-    }
+    },
+  });
+
+  const onSubmit = async () => {
+    mutate();
   };
 
   return (

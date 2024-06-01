@@ -24,8 +24,9 @@ import { useEffect, useState } from "react";
 import { client } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { DeleteConfirmation } from "@/components/DeleteConfirmation";
+import { useMemberInfo } from "@/hooks/queries/useMemberInfo";
 
-const { GET, PATCH, DELETE } = client;
+const { PATCH, DELETE } = client;
 
 const websiteFormSchema = z.object({
   username: z
@@ -49,6 +50,7 @@ export default function MembersEditForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { workspace } = useParams();
+  const { data } = useMemberInfo(username);
 
   const form = useForm<WebsiteFormValues>({
     resolver: zodResolver(websiteFormSchema),
@@ -86,27 +88,6 @@ export default function MembersEditForm() {
     }
   };
 
-  const fetchWebsiteInfo = async (signal: AbortSignal) => {
-    try {
-      if (!username) return;
-      const { response, data } = await GET("/api/users/{username}/", {
-        signal,
-        params: {
-          path: {
-            username: username,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        form.setValue("username", data?.username);
-        form.setValue("role", data?.role);
-      }
-    } catch {
-      //
-    }
-  };
-
   const deleteMember = async () => {
     try {
       if (!username) return;
@@ -131,11 +112,14 @@ export default function MembersEditForm() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWebsiteInfo(signal);
-    return () => controller.abort();
-  }, []);
+    if (data) {
+      form.reset({
+        username: data.username,
+        password: "",
+        role: data.role,
+      });
+    }
+  }, [data]);
 
   return (
     <Form {...form}>

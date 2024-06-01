@@ -14,6 +14,7 @@ import { Label } from "@ui/index";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { useParams } from "react-router";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -22,9 +23,8 @@ export function CreateWebsiteDialog({ refetch }: { refetch: () => void }) {
   const [name, setName] = useState<string>("");
   const [domain, setDomain] = useState<string>("");
 
-  const onSubmit = async () => {
-    try {
-      if (!workspace) return;
+  const { mutate } = useMutation({
+    mutationFn: async (workspace: string) => {
       const { response, error } = await POST("/api/websites/create/", {
         headers: {
           "Content-Type": "application/json",
@@ -48,11 +48,12 @@ export function CreateWebsiteDialog({ refetch }: { refetch: () => void }) {
           title: error?.detail,
         });
       }
-    } catch (error) {
-      toast({
-        title: "Something went wrong",
-      });
-    }
+    },
+  });
+
+  const onSubmit = async () => {
+    if (!workspace) return;
+    mutate(workspace);
   };
 
   return (

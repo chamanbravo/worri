@@ -1,5 +1,3 @@
-import { components } from "@/lib/api/v1";
-import { client } from "@/lib/utils";
 import useUserStore from "@/store/userStore";
 import {
   Table,
@@ -10,56 +8,24 @@ import {
   TableRow,
 } from "@ui/index";
 import { Button } from "@ui/index";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { CreateMemberDialog } from "./CreateMemberDialog";
-
-const { GET } = client;
+import { useMembers } from "@/hooks/queries/useMembers";
 
 export default function MembersTable() {
   const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
-  const [websites, setWebsites] = useState<
-    components["schemas"]["WorkspaceMemberOut"][]
-  >([]);
-  const [refetch, setRefetch] = useState<boolean>(false);
-
-  const fetchWebsites = async (signal: AbortSignal) => {
-    try {
-      if (!workspace) return;
-      const { response, data } = await GET("/api/workspaces/{name}/members/", {
-        signal,
-        params: {
-          path: {
-            name: workspace,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        setWebsites(data?.members);
-      }
-    } catch {
-      //
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWebsites(signal);
-    return () => controller.abort();
-  }, [refetch]);
+  const { data, refetch } = useMembers(workspace);
 
   return (
     <>
       <div className="flex justify-end w-full">
         <div className="inline-flex gap-2">
-          <CreateMemberDialog refetch={() => setRefetch((prev) => !prev)} />
+          <CreateMemberDialog refetch={refetch} />
         </div>
       </div>
-      {websites?.length ? (
+      {data?.length ? (
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -70,7 +36,7 @@ export default function MembersTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {websites?.map((w, i) => {
+            {data?.map((w, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
                   <TableCell className="font-medium">{w.username}</TableCell>

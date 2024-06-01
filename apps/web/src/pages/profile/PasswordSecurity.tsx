@@ -1,4 +1,3 @@
-import { useState } from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +16,7 @@ import Cookies from "js-cookie";
 import { toast } from "@ui/index";
 import { useNavigate } from "react-router";
 import useUserStore from "@/store/userStore";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -35,7 +35,6 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export default function PasswordSecurity() {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const clearUser = useUserStore((state) => state.clearUser);
 
@@ -48,24 +47,16 @@ export default function PasswordSecurity() {
     },
   });
 
-  async function onSubmit(formData: AccountFormValues) {
-    const { currentPassword, newPassword, confirmPassword } = formData;
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords do not match.",
-      });
-      return;
-    }
-
-    try {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: AccountFormValues) => {
       const { response, error } = await POST("/api/users/change-password/", {
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": Cookies.get("csrftoken") || "",
         },
         body: {
-          new_password: newPassword,
-          current_password: currentPassword,
+          new_password: formData.newPassword,
+          current_password: formData.currentPassword,
         },
       });
 
@@ -83,13 +74,23 @@ export default function PasswordSecurity() {
           title: errorRes[0].toString(),
         });
       }
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         title: "Something went wrong!",
       });
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  async function onSubmit(formData: AccountFormValues) {
+    const { newPassword, confirmPassword } = formData;
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords do not match.",
+      });
+      return;
     }
+    mutate(formData);
   }
 
   return (
@@ -154,8 +155,8 @@ export default function PasswordSecurity() {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Update Password"}
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Loading..." : "Update Password"}
           </Button>
         </form>
       </Form>

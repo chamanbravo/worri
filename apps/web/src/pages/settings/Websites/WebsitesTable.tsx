@@ -1,5 +1,3 @@
-import { components } from "@/lib/api/v1";
-import { client } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -9,55 +7,23 @@ import {
   TableRow,
 } from "@ui/index";
 import { Button } from "@ui/index";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { CreateWebsiteDialog } from "./CreateWebsiteDialog";
-
-const { GET } = client;
+import { useWebsites } from "@/hooks/queries/useWebsites";
 
 export default function WebsitesTable() {
   const { workspace } = useParams();
-  const [websites, setWebsites] = useState<
-    components["schemas"]["WebsiteOut"][]
-  >([]);
-  const [refetch, setRefetch] = useState<boolean>();
-
-  const fetchWebsites = async (signal: AbortSignal) => {
-    try {
-      if (!workspace) return;
-      const { response, data } = await GET("/api/workspaces/{name}/websites/", {
-        signal,
-        params: {
-          path: {
-            name: workspace,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        setWebsites(data?.websites);
-      }
-    } catch {
-      //
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWebsites(signal);
-    return () => controller.abort();
-  }, [refetch]);
+  const { data, refetch } = useWebsites(workspace);
 
   return (
     <>
       <div className="flex justify-end w-full">
         <div className="inline-flex gap-2">
-          <CreateWebsiteDialog refetch={() => setRefetch((prev) => !prev)} />
+          <CreateWebsiteDialog refetch={refetch} />
         </div>
       </div>
-      {websites?.length ? (
+      {data?.length ? (
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -68,7 +34,7 @@ export default function WebsitesTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {websites?.map((w, i) => {
+            {data?.map((w, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
                   <TableCell className="font-medium">{w.name}</TableCell>

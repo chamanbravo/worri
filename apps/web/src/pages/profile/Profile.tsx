@@ -1,4 +1,3 @@
-import { useState } from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,6 +15,7 @@ import { Input } from "@ui/index";
 import useUserStore from "@/store/userStore";
 import { client } from "@/lib/utils";
 import Cookies from "js-cookie";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -43,19 +43,17 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 export default function Profile() {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const [loading, setLoading] = useState(false);
 
-  const defaultValues = {
-    firstname: user.firstname,
-    lastname: user.lastname,
-  };
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
-    defaultValues,
+    defaultValues: {
+      firstname: user.firstname,
+      lastname: user.lastname,
+    },
   });
 
-  const onSubmit = async (formData: AccountFormValues) => {
-    try {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: AccountFormValues) => {
       const { response, error } = await POST("/api/users/update-profile/", {
         headers: {
           "Content-Type": "application/json",
@@ -84,13 +82,11 @@ export default function Profile() {
           title: errorRes[0].toString(),
         });
       }
-    } catch {
-      toast({
-        title: "Something went wrong!",
-      });
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = async (formData: AccountFormValues) => {
+    mutate(formData);
   };
 
   return (
@@ -145,8 +141,8 @@ export default function Profile() {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Update Profile"}
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Loading..." : "Update Profile"}
           </Button>
         </form>
       </Form>

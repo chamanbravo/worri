@@ -11,48 +11,19 @@ import { Button } from "@ui/index";
 import { Link, useParams } from "react-router-dom";
 import { CreateWorkspaceDialog } from "./CreateWorkspace";
 import { JoinWorkspaceDialog } from "./JoinWorkspace";
-import { components } from "@/lib/api/v1";
-import { client } from "@/lib/utils";
-import { useEffect, useState } from "react";
-
-const { GET } = client;
+import { useWorkspaces } from "@/hooks/queries/useWorkspace";
 
 export default function WorkspaceTable() {
   const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
-  const updateWorkspaceList = useUserStore((state) => state.updateWorkspace);
-  const [workspaces, setWorkspaces] = useState<
-    components["schemas"]["WorkspacesOut"][]
-  >([]);
-
-  const fetchWorkspaces = async (signal: AbortSignal) => {
-    try {
-      const { response, data } = await GET("/api/users/workspaces/", {
-        signal,
-      });
-
-      if (response.ok && data?.workspaces?.length) {
-        setWorkspaces(data?.workspaces);
-        updateWorkspaceList();
-      }
-    } catch {
-      //
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWorkspaces(signal);
-    return () => controller.abort();
-  }, []);
+  const { data, refetch } = useWorkspaces();
 
   return (
     <>
       <div className="flex justify-end w-full">
         <div className="inline-flex gap-2">
-          <JoinWorkspaceDialog />
-          <CreateWorkspaceDialog />
+          <JoinWorkspaceDialog refetch={refetch} />
+          <CreateWorkspaceDialog refetch={refetch} />
         </div>
       </div>
       {workspace?.length ? (
@@ -68,7 +39,7 @@ export default function WorkspaceTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {workspaces?.map((w, i) => {
+            {data?.map((w, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
                   <TableCell className="font-medium">{w.name}</TableCell>

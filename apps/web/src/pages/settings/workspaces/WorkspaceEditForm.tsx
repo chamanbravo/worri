@@ -11,7 +11,7 @@ import {
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { client, generateRandomString } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { Copy } from "lucide-react";
@@ -19,8 +19,9 @@ import { toast } from "@ui/index";
 import { useNavigate, useParams } from "react-router";
 import { DeleteConfirmation } from "@/components/DeleteConfirmation";
 import useUserStore from "@/store/userStore";
+import { useWorkspaceInfo } from "@/hooks/queries/useWorkspaceInfo";
 
-const { GET, PATCH, DELETE } = client;
+const { PATCH, DELETE } = client;
 
 const workspaceFormSchema = z.object({
   name: z
@@ -46,9 +47,14 @@ type WorkspaceFormValues = z.infer<typeof workspaceFormSchema>;
 export default function WorkspaceEditForm() {
   const { editWorkspaceName, workspace } = useParams();
   const [loading, setLoading] = useState(false);
-  const [currentWorkspace, setCurrentWorkspace] = useState(false);
   const navigate = useNavigate();
   const updateWorkspace = useUserStore((state) => state.updateWorkspace);
+  const { data } = useWorkspaceInfo(editWorkspaceName);
+
+  const currentWorkspace = useMemo(
+    () => workspace === editWorkspaceName,
+    [workspace, editWorkspaceName]
+  );
 
   const form = useForm<WorkspaceFormValues>({
     resolver: zodResolver(workspaceFormSchema),
@@ -57,6 +63,15 @@ export default function WorkspaceEditForm() {
       accessCode: "",
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      form.reset({
+        name: data?.name,
+        accessCode: data?.access_code,
+      });
+    }
+  }, [data, form]);
 
   const onSubmit = async (formData: WorkspaceFormValues) => {
     try {
@@ -90,27 +105,6 @@ export default function WorkspaceEditForm() {
     }
   };
 
-  const fetchWorkspaceInfo = async (signal: AbortSignal) => {
-    try {
-      if (!editWorkspaceName) return;
-      const { response, data } = await GET("/api/workspaces/{name}/", {
-        signal,
-        params: {
-          path: {
-            name: editWorkspaceName,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        form.setValue("name", data?.name);
-        form.setValue("accessCode", data?.access_code);
-      }
-    } catch {
-      //
-    }
-  };
-
   const deleteWorkspace = async () => {
     try {
       if (!editWorkspaceName) return;
@@ -136,16 +130,6 @@ export default function WorkspaceEditForm() {
       //
     }
   };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWorkspaceInfo(signal);
-    if (workspace === editWorkspaceName) {
-      setCurrentWorkspace(true);
-    }
-    return () => controller.abort();
-  }, []);
 
   return (
     <Form {...form}>

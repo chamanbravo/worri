@@ -1,51 +1,19 @@
 import { Navigate, Outlet } from "react-router-dom";
 import Navbar from "./Navbar/Navbar";
-import useUserStore from "@/store/userStore";
-import { useEffect, useState } from "react";
-import { client } from "@/lib/utils";
-
-const { GET } = client;
+import { useCurrentUser } from "@/hooks/queries/useCurrentUser";
 
 export default function ProtectedRoutes() {
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { data, isLoading } = useCurrentUser();
 
-  const fetchCurrentUser = async (signal: AbortSignal) => {
-    const { response, data } = await GET("/api/users/current/", { signal });
-    if (response.ok && data) {
-      setUser(
-        data.username,
-        data.first_name || "",
-        data.last_name || "",
-        data.role,
-        data.workspace
-      );
-      //
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (!user.username) {
-      fetchCurrentUser(signal);
-    } else {
-      setLoading(false);
-    }
-    return () => controller.abort();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return null;
   }
 
-  if (!user?.username) {
+  if (!data?.username) {
     return <Navigate to="/" replace />;
   }
 
-  if (user?.username && !user?.workspace?.length) {
+  if (data?.username && !data?.workspace?.length) {
     return <Navigate to={`app/`} replace />;
   }
 

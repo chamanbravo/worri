@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { components } from "@/lib/api/v1";
-import { client } from "@/lib/utils";
+import { useWebsites } from "@/hooks/queries/useWebsites";
 import {
   Table,
   TableBody,
@@ -10,50 +9,18 @@ import {
   TableRow,
 } from "@ui/index";
 import { Button } from "@ui/index";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 
-const { GET } = client;
-
 export default function index() {
   const { workspace } = useParams();
-  const [websites, setWebsites] = useState<
-    components["schemas"]["WebsiteOut"][]
-  >([]);
-
-  const fetchWebsites = async (signal: AbortSignal) => {
-    try {
-      if (!workspace) return;
-      const { response, data } = await GET("/api/workspaces/{name}/websites/", {
-        signal,
-        params: {
-          path: {
-            name: workspace,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        setWebsites(data?.websites);
-      }
-    } catch {
-      //
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWebsites(signal);
-    return () => controller.abort();
-  }, []);
+  const { data } = useWebsites(workspace);
 
   return (
     <div className="p-10 px-4 pb-16 space-y-6 md:block max-w-[1280px] mx-auto">
       <h2 className="text-2xl font-bold tracking-tight">Websites</h2>
 
-      {websites?.length ? (
+      {data?.length ? (
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -63,7 +30,7 @@ export default function index() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {websites?.map((w, i) => {
+            {data?.map((w, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
                   <TableCell className="font-medium">{w.name}</TableCell>

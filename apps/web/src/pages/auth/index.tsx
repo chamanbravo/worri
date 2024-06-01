@@ -1,29 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import lightRay from "@/assets/light-ray.png";
-import { client } from "@/lib/utils";
-
-const { GET } = client;
+import { useNeedSetup } from "@/hooks/queries/useNeedSetup";
 
 export default function index() {
-  const [needSetup, setNeedSetup] = useState<boolean | undefined>(undefined);
-
-  const fetchNeedSetup = async () => {
-    try {
-      const { response, data } = await GET("/api/users/setup/");
-      if (response.ok) {
-        setNeedSetup(data?.need_setup);
-      }
-    } catch (err) {
-      console.error("Error fetching data:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchNeedSetup();
-  }, []);
+  const { data } = useNeedSetup();
 
   return (
     <>
@@ -37,7 +19,7 @@ export default function index() {
       </div>
 
       <div className="mt-4 px-4 flex justify-center items-center md:h-[100vh] md:mt-0 md:px-0 overflow-hidden">
-        {needSetup === undefined ? null : needSetup ? (
+        {data?.need_setup === undefined ? null : data?.need_setup ? (
           <RegisterForm />
         ) : (
           <LoginForm />

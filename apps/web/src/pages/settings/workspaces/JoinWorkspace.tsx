@@ -14,15 +14,16 @@ import { Label } from "@ui/index";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import useUserStore from "@/store/userStore";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
-export function JoinWorkspaceDialog() {
+export function JoinWorkspaceDialog({ refetch }: { refetch: () => void }) {
   const [accessCode, setAccessCode] = useState<string>("");
   const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
-  const onSubmit = async () => {
-    try {
+  const { mutate } = useMutation({
+    mutationFn: async () => {
       const { response } = await POST("/api/workspaces/join/", {
         headers: {
           "Content-Type": "application/json",
@@ -37,6 +38,7 @@ export function JoinWorkspaceDialog() {
         toast({
           title: "Workspace joined successfully.",
         });
+        refetch();
         updateWorkspace();
       }
       if (!response.ok) {
@@ -44,9 +46,11 @@ export function JoinWorkspaceDialog() {
           title: "Invalid access code.",
         });
       }
-    } catch (error) {
-      //
-    }
+    },
+  });
+
+  const onSubmit = async () => {
+    mutate();
   };
 
   return (

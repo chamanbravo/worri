@@ -13,12 +13,13 @@ import {
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { client } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { DeleteConfirmation } from "@/components/DeleteConfirmation";
+import { useWebsiteInfo } from "@/hooks/queries/useWebsiteInfo";
 
-const { GET, PATCH, DELETE } = client;
+const { PATCH, DELETE } = client;
 
 const websiteFormSchema = z.object({
   name: z
@@ -46,6 +47,7 @@ export default function WebsiteEditForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { workspace } = useParams();
+  const { data } = useWebsiteInfo(id);
 
   const form = useForm<WebsiteFormValues>({
     resolver: zodResolver(websiteFormSchema),
@@ -54,6 +56,11 @@ export default function WebsiteEditForm() {
       domain: "",
     },
   });
+
+  if (data) {
+    form.setValue("name", data?.name);
+    form.setValue("domain", data?.domain);
+  }
 
   const onSubmit = async (formData: WebsiteFormValues) => {
     try {
@@ -83,27 +90,6 @@ export default function WebsiteEditForm() {
     }
   };
 
-  const fetchWebsiteInfo = async (signal: AbortSignal) => {
-    try {
-      if (!id) return;
-      const { response, data } = await GET("/api/websites/{id}/", {
-        signal,
-        params: {
-          path: {
-            id: +id,
-          },
-        },
-      });
-
-      if (response.ok && data) {
-        form.setValue("name", data?.name);
-        form.setValue("domain", data?.domain);
-      }
-    } catch {
-      //
-    }
-  };
-
   const deleteWebsite = async () => {
     try {
       if (!id) return;
@@ -125,13 +111,6 @@ export default function WebsiteEditForm() {
       //
     }
   };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchWebsiteInfo(signal);
-    return () => controller.abort();
-  }, []);
 
   return (
     <Form {...form}>

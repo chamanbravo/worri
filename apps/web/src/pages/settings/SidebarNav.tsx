@@ -24,7 +24,7 @@ export default function SidebarNav({ className, ...props }: SidebarNavProps) {
         href: `/app/${workspace}/settings/members/`,
       },
     ];
-  }, []);
+  }, [workspace]);
 
   return (
     <nav

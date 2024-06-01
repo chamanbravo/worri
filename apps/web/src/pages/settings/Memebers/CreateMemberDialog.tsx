@@ -24,6 +24,7 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import { useParams } from "react-router";
 import { components } from "@/lib/api/v1";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -35,9 +36,8 @@ export function CreateMemberDialog({ refetch }: { refetch: () => void }) {
   const [password, setPassword] = useState<string>("");
   const [role, setRole] = useState<TypeRole>("VIEWER");
 
-  const onSubmit = async () => {
-    try {
-      if (!workspace) return;
+  const { mutate } = useMutation({
+    mutationFn: async (workspace: string) => {
       const { response, error } = await POST("/api/users/create/", {
         headers: {
           "Content-Type": "application/json",
@@ -69,11 +69,12 @@ export function CreateMemberDialog({ refetch }: { refetch: () => void }) {
           });
         }
       }
-    } catch (error) {
-      toast({
-        title: "Something went wrong",
-      });
-    }
+    },
+  });
+
+  const onSubmit = async () => {
+    if (!workspace) return;
+    mutate(workspace);
   };
 
   return (

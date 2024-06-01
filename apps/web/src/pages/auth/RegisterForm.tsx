@@ -1,4 +1,3 @@
-import { useState } from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,6 +15,7 @@ import { toast } from "@repo/ui";
 import { useNavigate } from "react-router";
 import Cookies from "js-cookie";
 import { client } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
 
 const { POST } = client;
 
@@ -37,15 +37,13 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState<boolean>(false);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: { username: "", email: "", password: "" },
   });
 
-  async function onSubmit(formData: RegisterFormValues) {
-    try {
-      setLoading(true);
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: RegisterFormValues) => {
       const { response, error } = await POST("/api/users/register/", {
         method: "POST",
         headers: {
@@ -81,14 +79,16 @@ export default function RegisterForm() {
           });
         }
       }
-    } catch (error) {
-      console.log("error:", error);
-      return toast({
+    },
+    onError: () => {
+      toast({
         title: "Something went wrong!",
       });
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  async function onSubmit(formData: RegisterFormValues) {
+    mutate(formData);
   }
 
   return (
@@ -153,8 +153,8 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Loading..." : "Create Account"}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Loading..." : "Create Account"}
           </Button>
         </form>
       </Form>

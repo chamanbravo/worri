@@ -74,9 +74,9 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         user = User.objects.create_user(  # type: ignore
-            username=serializer.validated_data["username"],  # type: ignore
-            email=serializer.validated_data["email"],  # type: ignore
-            password=serializer.validated_data["password"],  # type: ignore
+            username=serializer.validated_data["username"],
+            email=serializer.validated_data["email"],
+            password=serializer.validated_data["password"],
             role="ADMIN",
         )
         default_workspace, _ = Workspace.objects.get_or_create(
@@ -103,8 +103,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
     def login(self, request: Request):
         serializer = UserLoginIn(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data["username"]  # type: ignore
-        password = serializer.validated_data["password"]  # type: ignore
+        username = serializer.validated_data["username"]
+        password = serializer.validated_data["password"]
 
         user = authenticate(request, username=username, password=password)
         if user is None:
@@ -167,14 +167,16 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
         body_serializer.is_valid(raise_exception=True)
 
         try:
-            user = User.objects.get(username=param_serializer.validated_data["username"])  # type: ignore
+            user = User.objects.get(
+                username=param_serializer.validated_data["username"]
+            )
 
-            if "password" in body_serializer.validated_data:  # type: ignore
-                password: str = body_serializer.validated_data.pop("password")  # type: ignore
-                user.password = make_password(password)  # type: ignore
+            if "password" in body_serializer.validated_data:
+                password: str = body_serializer.validated_data.pop("password")
+                user.password = make_password(password)
 
-            for attr, value in body_serializer.validated_data.items():  # type: ignore
-                setattr(user, attr, value)  # type: ignore
+            for attr, value in body_serializer.validated_data.items():
+                setattr(user, attr, value)
 
             user.save()
 
@@ -223,14 +225,16 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
         serializer.is_valid(raise_exception=True)
 
         try:
-            workspace = Workspace.objects.get(name=serializer.validated_data["workspace"])  # type: ignore
+            workspace = Workspace.objects.get(
+                name=serializer.validated_data["workspace"]
+            )
         except Workspace.DoesNotExist:
             return Response({"detail": "Workspace not found."})
 
         user = User.objects.create_user(  # type: ignore
-            username=serializer.validated_data["username"],  # type: ignore
-            password=serializer.validated_data["password"],  # type: ignore
-            role=serializer.validated_data["role"],  # type: ignore
+            username=serializer.validated_data["username"],
+            password=serializer.validated_data["password"],
+            role=serializer.validated_data["role"],
         )
         user.workspace.add(workspace)
         user.save()
@@ -272,8 +276,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
-        for attr, value in serializer.validated_data.items():  # type: ignore
-            setattr(user, attr, value)  # type: ignore
+        for attr, value in serializer.validated_data.items():
+            setattr(user, attr, value)
 
         user.save()
 
@@ -303,7 +307,7 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
-        new_password = serializer.validated_data["new_password"]  # type: ignore
+        new_password = serializer.validated_data["new_password"]
 
         user.set_password(new_password)
         user.save()
@@ -341,7 +345,7 @@ class WorkspaceViewSet(
         serializer.is_valid(raise_exception=True)
 
         workspace = Workspace.objects.create(
-            name=serializer.validated_data["name"],  # type: ignore
+            name=serializer.validated_data["name"],
             created_by=request.user,
             access_code="hahaha",
         )
@@ -371,7 +375,7 @@ class WorkspaceViewSet(
 
         try:
             workspace = Workspace.objects.get(
-                access_code=serializer.validated_data["access_code"],  # type: ignore
+                access_code=serializer.validated_data["access_code"],
             )
         except Workspace.DoesNotExist:
             return Response(
@@ -439,13 +443,15 @@ class WebsiteViewSet(
         serializer.is_valid(raise_exception=True)
 
         try:
-            workspace = Workspace.objects.get(name=serializer.validated_data["workspace"]["name"])  # type: ignore
+            workspace = Workspace.objects.get(
+                name=serializer.validated_data["workspace"]["name"]
+            )
         except Workspace.DoesNotExist:
             return Response({"detail": "Workspace not found."})
 
         Website.objects.create(
-            name=serializer.validated_data["name"],  # type: ignore
-            domain=serializer.validated_data["domain"],  # type: ignore
+            name=serializer.validated_data["name"],
+            domain=serializer.validated_data["domain"],
             workspace=workspace,
             created_by=request.user,
         )

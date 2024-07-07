@@ -112,6 +112,12 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin, DestroyModelMixin):
                 {"detail": "Invalid credentials."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+        if not user.role:
+            return Response(
+                {"detail": "Invalid user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         login(request, user)  # type: ignore
         return Response(UserOut(user).data, status=status.HTTP_200_OK)

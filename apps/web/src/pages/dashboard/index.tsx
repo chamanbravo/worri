@@ -10,7 +10,7 @@ import { useWebsites } from "@/hooks/queries/useWebsites";
 export default function index() {
   const { workspace } = useParams();
   const user = useUserStore((state) => state.user);
-  const { data } = useWebsites(workspace);
+  const { data, isLoading } = useWebsites(workspace);
 
   return (
     <div className="p-10 px-4 pb-16 space-y-6 md:block max-w-[1280px] mx-auto">
@@ -22,25 +22,15 @@ export default function index() {
             You do not have any workspace configured
           </span>
           <div className="flex gap-3">
-            <JoinWorkspaceDialog />
-            {user.role === "ADMIN" && <CreateWorkspaceDialog />}
+            <JoinWorkspaceDialog refetch={() => {}} />
+            {user.role === "ADMIN" && (
+              <CreateWorkspaceDialog refetch={() => {}} />
+            )}
           </div>
         </div>
       )}
 
-      {!user.workspace.length && (
-        <div className="flex flex-col items-center justify-center gap-3 h-[calc(100vh-25rem)]">
-          <span className="pt-4 text-sm text-muted-foreground">
-            You do not have any workspace configured
-          </span>
-          <div className="flex gap-3">
-            <JoinWorkspaceDialog />
-            {user.role === "ADMIN" && <CreateWorkspaceDialog />}
-          </div>
-        </div>
-      )}
-
-      {!data?.length && (
+      {!data?.length && !isLoading && (
         <div className="flex flex-col items-center justify-center h-[calc(100vh-25rem)] gap-2 text-center">
           <span className="pt-4 text-sm text-muted-foreground">
             You do not have any websites configured

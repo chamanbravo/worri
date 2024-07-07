@@ -41,10 +41,20 @@ export function CreateWorkspaceDialog({ refetch }: { refetch: () => void }) {
         refetch();
         updateWorkspace();
       }
-      if (!response.ok) {
-        toast({
-          title: error?.name[0],
-        });
+      if (!response.ok && error) {
+        if ("detail" in error) {
+          toast({
+            title: error.detail,
+          });
+        } else if ("name" in error) {
+          toast({
+            title: error["name"][0],
+          });
+        } else {
+          toast({
+            title: "Something went wrong!",
+          });
+        }
       }
     },
   });

@@ -80,6 +80,7 @@ export interface components {
       new_password: string;
     };
     CreateWorkspaceErrorOut: {
+      detail: string;
       name: string[];
     };
     CreateWorkspaceInRequest: {

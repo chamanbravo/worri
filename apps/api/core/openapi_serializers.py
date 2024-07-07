@@ -29,7 +29,7 @@ class WorkspaceListOut(Serializer):
     workspaces = ListSerializer(child=WorkspacesOut())
 
 
-class CreateWorkspaceErrorOut(Serializer):
+class CreateWorkspaceErrorOut(GenericOut):
     name = ListSerializer(child=CharField())
 
 

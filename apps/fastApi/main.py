@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
-from api import user_router
+from api import auth_router, user_router
 
 app = FastAPI(title="Worri", version="0.1.0")
 
-app.include_router(user_router, prefix="/api/users", tags=["users"])
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(user_router, prefix="/api/users", tags=["user"])

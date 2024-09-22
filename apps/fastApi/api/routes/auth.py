@@ -13,11 +13,11 @@ from schemas.user import UserRegister
 from utils import security
 from utils.security import get_password_hash
 
-router = APIRouter(tags=["auth"])
+router = APIRouter(tags=["auth"], prefix="/auth")
 
 
 @router.post(
-    "/register", response_model=dict, status_code=status.HTTP_201_CREATED
+    "/register", response_model=Token, status_code=status.HTTP_201_CREATED
 )
 def register(user_register: UserRegister, db: Session = Depends(get_db)):
     user = user_crud.get_user_by_username(db, username=user_register.username)
@@ -27,24 +27,16 @@ def register(user_register: UserRegister, db: Session = Depends(get_db)):
             detail=f"The user with this username already exists in the system",
         )
 
-    user = user_crud.get_user_by_email(db, email=user_register.email)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"The user with this email already exists in the system",
-        )
-
     user_data = User(
         username=user_register.username,
-        email=user_register.email,
         hashed_password=get_password_hash(user_register.password),
         role="ADMIN",
     )
-    user_crud.create_user(db, user_data=user_data)
+    new_user = user_crud.create_user(db, user_data=user_data)
 
     access_token_expires = timedelta(minutes=ENV.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        subject=user.id, expires_delta=access_token_expires
+        subject=new_user.id, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -60,7 +52,7 @@ def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password",
+            detail="Incorrect username or password",
         )
 
     access_token_expires = timedelta(minutes=ENV.ACCESS_TOKEN_EXPIRE_MINUTES)

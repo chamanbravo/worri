@@ -1,8 +1,10 @@
 from typing import Optional
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from models.user import User
+from schemas.user import UserPatch
 from utils.security import verify_password
 
 from .base import BaseCRUDRepository
@@ -35,6 +37,36 @@ class UserCRUDRepository(BaseCRUDRepository):
 
     def admin_exists(self, db: Session) -> bool:
         return db.query(User).filter(User.role == "ADMIN").count() == 0
+
+    def get_user_workspaces(self, db: Session, username: str) -> list[str]:
+        user = db.query(User).filter(User.username == username).first()
+        if user:
+            return user.workspaces
+        return []
+
+    def delete_user(self, db: Session, username: str):
+        user = db.query(User).filter(User.username == username).first()
+
+        if user:
+            db.delete(user)
+            db.commit()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User doesn't exist.",
+            )
+
+    def patch(self, db: Session, username: str, user_data: UserPatch) -> User:
+        user = db.query(User).filter(User.username == username).first()
+
+        if user:
+            for key, value in user_data.dict(exclude_unset=True).items():
+                setattr(user, key, value)
+
+            db.commit()
+            return user
+        else:
+            return None
 
 
 user_crud = UserCRUDRepository(model=User)

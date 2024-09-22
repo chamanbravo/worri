@@ -20,6 +20,7 @@ user_workspace = Table(
 )
 
 
+# todo: make email nullable, add created_by field
 class User(TimeStampMixin):
     __tablename__ = "users"
 
@@ -27,8 +28,9 @@ class User(TimeStampMixin):
     username = Column(String(30), unique=True, index=True, nullable=False)
     first_name = Column(String(30), nullable=True, default="")
     last_name = Column(String(30), nullable=True, default="")
-    email = Column(String(100), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=False, nullable=True, default="")
     role = Column(Enum(RoleEnum), nullable=False)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     hashed_password = Column(String, nullable=False)
 
     workspaces = relationship(

@@ -16,7 +16,7 @@ class NeedSetup(BaseModel):
 
 
 class UserRegister(BaseModel):
-    username: str = Field(min_lenght=3)
+    username: str = Field(min_length=3)
     password: str = Field(min_length=8)
 
 
@@ -26,7 +26,7 @@ class UserOut(UserBase):
 
 
 class UserCreate(BaseModel):
-    username: str = Field(min_lenght=3)
+    username: str = Field(min_length=3)
     password: str = Field(min_length=8)
     role: RoleEnum
 

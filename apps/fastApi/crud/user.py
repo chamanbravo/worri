@@ -31,7 +31,7 @@ class UserCRUDRepository(BaseCRUDRepository):
         user = self.get_user_by_username(db, username)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        if not verify_password(password, str(user.hashed_password)):
             return None
         return user
 
@@ -56,7 +56,9 @@ class UserCRUDRepository(BaseCRUDRepository):
                 detail="User doesn't exist.",
             )
 
-    def patch(self, db: Session, username: str, user_data: UserPatch) -> User:
+    def patch(
+        self, db: Session, username: str, user_data: UserPatch
+    ) -> Optional[User]:
         user = db.query(User).filter(User.username == username).first()
 
         if user:

@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_current_admin, get_current_user
-from config import ENV
 from crud import user_crud
 from database.database import get_db
 from models.user import User
@@ -73,7 +72,7 @@ def create_user(
     response_model=GenericOut,
     dependencies=[Depends(get_current_admin)],
 )
-def create_user(username: str, db: Session = Depends(get_db)):
+def delete_user(username: str, db: Session = Depends(get_db)):
     user_crud.delete_user(db, username=username)
     return {"detail": "User deleted successfully."}
 

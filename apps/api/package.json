@@ -1,9 +1,0 @@
-{
-    "name": "api",
-    "private": true,
-    "scripts": {
-        "dev": "python3 manage.py runserver",
-        "make-migrations": "python3 manage.py makemigrations",
-        "migrate": "python3 manage.py migrate"
-    }
-}

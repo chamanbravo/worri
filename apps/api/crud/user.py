@@ -1,10 +1,10 @@
 from typing import Optional
 
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-
+from fastapi import HTTPException
+from fastapi import status
 from models.user import User
 from schemas.user import UserPatch
+from sqlalchemy.orm import Session
 from utils.security import verify_password
 
 from .base import BaseCRUDRepository
@@ -62,13 +62,17 @@ class UserCRUDRepository(BaseCRUDRepository):
         user = db.query(User).filter(User.username == username).first()
 
         if user:
-            for key, value in user_data.dict(exclude_unset=True).items():
+            for key, value in user_data.model_dump(exclude_unset=True).items():
                 setattr(user, key, value)
 
             db.commit()
             return user
         else:
             return None
+
+    def get_admins(self, db: Session):
+        users = db.query(User).filter(User.role == "ADMIN").all()
+        return users
 
 
 user_crud = UserCRUDRepository(model=User)

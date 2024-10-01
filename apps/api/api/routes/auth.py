@@ -1,15 +1,17 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-
 from config import ENV
 from crud import user_crud
 from database.database import get_db
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
+from fastapi.security import OAuth2PasswordRequestForm
 from models.user import User
 from schemas.auth import Token
 from schemas.user import UserRegister
+from sqlalchemy.orm import Session
 from utils import security
 from utils.security import get_password_hash
 
@@ -20,11 +22,11 @@ router = APIRouter(tags=["auth"], prefix="/auth")
     "/register", response_model=Token, status_code=status.HTTP_201_CREATED
 )
 def register(user_register: UserRegister, db: Session = Depends(get_db)):
-    user = user_crud.get_user_by_username(db, username=user_register.username)
-    if user:
+    users = user_crud.get_admins(db)
+    if len(users) > 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"The user with this username already exists in the system",
+            detail=f"Not allowed. Admin already exists.",
         )
 
     user_data = User(

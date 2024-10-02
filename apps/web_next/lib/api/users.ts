@@ -1,4 +1,5 @@
 import { API_HOST } from "../constants";
+import { serverFetch } from "./api";
 import { components } from "./types";
 
 export const fetchNeedSetup = async (): Promise<
@@ -11,6 +12,22 @@ export const fetchNeedSetup = async (): Promise<
     if (response.ok) {
       const data = await response.json();
       return data;
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return null;
+  }
+};
+
+export const fetchUserWorkspaces = async (): Promise<
+  components["schemas"]["WorkspaceListOut"]["workspaces"] | null
+> => {
+  try {
+    const response = await serverFetch("/api/users/me/workspaces");
+    if (response.ok) {
+      const data = await response.json();
+      return data.workspaces;
     }
     return null;
   } catch (err) {

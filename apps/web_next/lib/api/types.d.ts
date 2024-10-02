@@ -74,7 +74,7 @@ export interface paths {
         patch: operations["patch_user_api_users__username__patch"];
         trace?: never;
     };
-    "/api/users/{username}/workspaces": {
+    "/api/users/me/workspaces": {
         parameters: {
             query?: never;
             header?: never;
@@ -82,7 +82,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get User Workspaces */
-        get: operations["get_user_workspaces_api_users__username__workspaces_get"];
+        get: operations["get_user_workspaces_api_users_me_workspaces_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -184,6 +184,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AuthResponse */
+        AuthResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Token Type */
+            token_type: string;
+            /** Username */
+            username: string;
+            /** Role */
+            role: string;
+        };
         /** Body_login_api_auth_login_post */
         Body_login_api_auth_login_post: {
             /** Grant Type */
@@ -222,13 +233,6 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "ADMIN" | "EDITOR" | "VIEWER";
-        /** Token */
-        Token: {
-            /** Access Token */
-            access_token: string;
-            /** Token Type */
-            token_type: string;
-        };
         /** UserCreate */
         UserCreate: {
             /** Username */
@@ -353,7 +357,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Token"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Validation Error */
@@ -386,7 +390,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Token"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Validation Error */
@@ -517,13 +521,11 @@ export interface operations {
             };
         };
     };
-    get_user_workspaces_api_users__username__workspaces_get: {
+    get_user_workspaces_api_users_me_workspaces_get: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                username: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -535,15 +537,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkspaceListOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

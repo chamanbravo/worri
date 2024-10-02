@@ -23,6 +23,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { setCookie } from "@/lib/utils";
+import useUserStore from "@/store/userStore";
 
 const loginFormSchema = z.object({
   username: z
@@ -39,6 +41,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const setUser = useUserStore((state) => state.setUser);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -61,6 +64,9 @@ export default function LoginForm() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        setCookie("access_token", data?.access_token, 1);
+        setUser(data.username, "", "", data.role, []);
         setLoading(false);
         router.push("/app");
       } else if (response.status === 400) {

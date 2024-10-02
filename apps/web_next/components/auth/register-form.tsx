@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { setCookie } from "@/lib/utils";
+import useUserStore from "@/store/userStore";
 
 const registerFormSchema = z.object({
   username: z
@@ -41,6 +43,7 @@ export default function RegisterForm() {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const setUser = useUserStore((state) => state.setUser);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: { username: "", password: "" },
@@ -61,10 +64,13 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        setCookie("access_token", data?.access_token, 1);
+        setUser(data.username, "", "", data.role, []);
         toast({
           title: "Account Created",
         });
-        router.push("/app");
+        router.push("/app/cool-space/");
       } else if (response.status === 400) {
         const data = await response.json();
         if (data?.detail) {

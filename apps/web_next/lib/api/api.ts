@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { API_HOST } from "../constants";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 
 export const isRedirectError = (err: any) => {
   return (
@@ -13,13 +13,13 @@ export const isRedirectError = (err: any) => {
 };
 
 export const serverFetch = async (url: string, options?: RequestInit) => {
-  const headerList = headers();
-  const accessToken = headerList.get("x-access-token");
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("access_token");
 
   const response = await fetch(API_HOST + url, {
     headers: {
       accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken?.value}`,
     },
     ...options,
   });

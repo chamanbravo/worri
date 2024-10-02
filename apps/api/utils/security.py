@@ -1,24 +1,30 @@
-from datetime import datetime, timedelta
-from typing import Any, Optional, Union
-
-from jose import jwt
-from passlib.context import CryptContext
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 from config import ENV
+from jose import jwt
+from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def create_access_token(
-    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
+    subject: Dict[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=ENV.ACCESS_TOKEN_EXPIRE_MINUTES
         )
-    to_encode = {"exp": expire, "sub": str(subject)}
+    to_encode = {
+        "exp": expire,
+        "sub": subject["username"],
+    }
     encoded_jwt = jwt.encode(to_encode, ENV.SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 

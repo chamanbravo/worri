@@ -1,13 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from api.dependencies import get_current_admin, get_current_user
+from api.dependencies import get_current_admin
+from api.dependencies import get_current_user
 from crud import user_crud
 from database.database import get_db
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
 from models.user import User
 from schemas.base import GenericOut
-from schemas.user import NeedSetup, UserCreate, UserOut, UserPatch
+from schemas.user import NeedSetup
+from schemas.user import UserCreate
+from schemas.user import UserOut
+from schemas.user import UserPatch
 from schemas.workspace import WorkspaceListOut
+from sqlalchemy.orm import Session
 from utils.security import get_password_hash
 
 router = APIRouter(tags=["user"], prefix="/users")
@@ -30,12 +36,15 @@ def get_user(username: str, db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/{username}/workspaces",
+    "/me/workspaces",
     response_model=WorkspaceListOut,
     dependencies=[Depends(get_current_user)],
 )
-def get_user_workspaces(username: str, db: Session = Depends(get_db)):
-    workspaces = user_crud.get_user_workspaces(db, username=username)
+def get_user_workspaces(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    workspaces = user_crud.get_user_workspaces(db, username=str(user.username))
     return {"workspaces": workspaces}
 
 

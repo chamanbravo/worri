@@ -1,13 +1,15 @@
-from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
+class AuthResponse(BaseModel):
     access_token: str
     token_type: str
-    token_type: str
+    username: str
+    role: str
 
 
 class TokenPayload(BaseModel):
-    sub: Optional[int] = None
+    sub: str
+    exp: datetime

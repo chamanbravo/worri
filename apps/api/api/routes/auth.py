@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from fastapi import status
 from fastapi.security import OAuth2PasswordRequestForm
 from models.user import User
-from schemas.auth import Token
+from schemas.auth import AuthResponse
 from schemas.user import UserRegister
 from sqlalchemy.orm import Session
 from utils import security
@@ -19,7 +19,9 @@ router = APIRouter(tags=["auth"], prefix="/auth")
 
 
 @router.post(
-    "/register", response_model=Token, status_code=status.HTTP_201_CREATED
+    "/register",
+    response_model=AuthResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def register(user_register: UserRegister, db: Session = Depends(get_db)):
     users = user_crud.get_admins(db)
@@ -38,12 +40,18 @@ def register(user_register: UserRegister, db: Session = Depends(get_db)):
 
     access_token_expires = timedelta(minutes=ENV.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        subject=new_user.id, expires_delta=access_token_expires
+        subject={"id": new_user.id, "username": new_user.username},
+        expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": new_user.username,
+        "role": new_user.role,
+    }
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=AuthResponse)
 def login(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -59,6 +67,12 @@ def login(
 
     access_token_expires = timedelta(minutes=ENV.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        subject=user.id, expires_delta=access_token_expires
+        subject={"id": user.id, "username": user.username},
+        expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": user.username,
+        "role": user.role,
+    }

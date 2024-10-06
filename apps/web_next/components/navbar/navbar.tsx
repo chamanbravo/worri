@@ -4,13 +4,37 @@ import { cn } from "@/lib/utils";
 import { WorkspaceDropdown } from "./workspace-dropdown";
 import { UserDropdown } from "./user-dropdown";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
+import { components } from "@/lib/api/types";
+import useUserStore from "@/store/userStore";
+import { useEffect } from "react";
 
 const active = "text-sm font-medium hover:text-foreground";
 const inactive = cn(active, "text-muted-foreground");
 
-export default function Navbar() {
+interface Props {
+  user: components["schemas"]["UserOut"] | null;
+  workspaces: string[] | null;
+}
+
+export default function Navbar({ user, workspaces }: Props) {
   const pathname = usePathname();
+  const setUser = useUserStore((state) => state.setUser);
+  const pathnameRegex = /^\/app\/.+$/;
+
+  useEffect(() => {
+    if (pathnameRegex.test(pathname) && !workspaces?.length) {
+      redirect("/app/");
+    }
+
+    setUser(
+      user?.username || "",
+      user?.first_name || "",
+      user?.last_name || "",
+      user?.role || "",
+      workspaces || []
+    );
+  }, [user, workspaces]);
 
   return (
     <div className="border-b">
@@ -20,9 +44,7 @@ export default function Navbar() {
           <nav className={"flex items-center space-x-4 mx-6"}>
             <Link
               href={"/app/"}
-              className={
-                pathname.includes("dashboard" || "app") ? active : inactive
-              }
+              className={pathname.includes("dashboard") ? active : inactive}
             >
               Dashboard
             </Link>
@@ -39,8 +61,10 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <WorkspaceDropdown />
-          <UserDropdown />
+          {workspaces?.length ? (
+            <WorkspaceDropdown workspaces={workspaces} />
+          ) : null}
+          <UserDropdown user={user} />
         </div>
       </div>
     </div>

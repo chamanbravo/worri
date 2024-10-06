@@ -11,9 +11,9 @@ export const clientFetch = async (url: string, options?: RequestInit) => {
     },
     ...options,
   });
-  if (response.ok) {
-    return response;
-  } else if (response.status === 401) {
-  }
+  // if (response.ok) {
+  //   return response;
+  // } else if (response.status === 401) {
+  // }
   return response;
 };

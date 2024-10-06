@@ -20,7 +20,23 @@ export const fetchNeedSetup = async (): Promise<
   }
 };
 
-export const fetchUserWorkspaces = async (): Promise<
+export const fetchCurrentUser = async (): Promise<
+  components["schemas"]["UserOut"] | null
+> => {
+  try {
+    const response = await serverFetch("/api/users/me");
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return null;
+  }
+};
+
+export const fetchCurrentUserWorkspaces = async (): Promise<
   components["schemas"]["WorkspaceListOut"]["workspaces"] | null
 > => {
   try {

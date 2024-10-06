@@ -1,10 +1,11 @@
 from typing import Optional
 
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-
+from fastapi import HTTPException
+from fastapi import status
+from models.user import User
 from models.workspace import Workspace
 from schemas.workspace import WorkspacePatch
+from sqlalchemy.orm import Session
 
 from .base import BaseCRUDRepository
 
@@ -18,6 +19,12 @@ class WorkspaceCRUDRepository(BaseCRUDRepository):
         db.refresh(workspace_data)
         return workspace_data
 
+    def add_user_to_workspace(
+        self, db: Session, workspace: Workspace, user: User
+    ):
+        user.workspaces.append(workspace)
+        db.commit()
+
     def get_workspace_by_name(
         self, db: Session, workspace_name: str
     ) -> Optional[Workspace]:
@@ -28,12 +35,12 @@ class WorkspaceCRUDRepository(BaseCRUDRepository):
         )
         return workspace
 
-    def delete_workspace(self, db: Session, workspace_name: str):
-        workspace = (
-            db.query(Workspace)
-            .filter(Workspace.name == workspace_name)
-            .first()
-        )
+    def delete_workspace(
+        self,
+        db: Session,
+        workspace_name: str,
+    ):
+        workspace = self.get_workspace_by_name(db, workspace_name)
 
         if workspace:
             db.delete(workspace)
@@ -54,7 +61,7 @@ class WorkspaceCRUDRepository(BaseCRUDRepository):
         )
 
         if workspace:
-            for key, value in user_data.dict(exclude_unset=True).items():
+            for key, value in user_data.model_dump(exclude_unset=True).items():
                 setattr(workspace, key, value)
 
             db.commit()

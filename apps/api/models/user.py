@@ -1,9 +1,15 @@
 import enum
 
-from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table
+from sqlalchemy import Column
+from sqlalchemy import Enum
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import Table
 from sqlalchemy.orm import relationship
 
-from .base import Base, TimeStampMixin
+from .base import Base
+from .base import TimeStampMixin
 
 
 class RoleEnum(enum.Enum):
@@ -20,7 +26,6 @@ user_workspace = Table(
 )
 
 
-# todo: make email nullable, add created_by field
 class User(TimeStampMixin):
     __tablename__ = "users"
 

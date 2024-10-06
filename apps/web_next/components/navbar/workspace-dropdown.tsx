@@ -13,10 +13,13 @@ import {
 import { Briefcase, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function WorkspaceDropdown() {
+interface Props {
+  workspaces: string[];
+}
+
+export function WorkspaceDropdown({ workspaces }: Props) {
   const router = useRouter();
   const workspace = "chad";
-  const workspaces = ["chad", "god"];
 
   return (
     <DropdownMenu>

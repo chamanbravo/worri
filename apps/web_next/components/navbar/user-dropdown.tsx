@@ -10,12 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { components } from "@/lib/api/types";
 import { CircleUserRound, User, LogOut } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export function UserDropdown() {
-  // const { workspace } = useParams();
-  // const router = useRouter();
+interface Props {
+  user: components["schemas"]["UserOut"] | null;
+}
+
+export function UserDropdown({ user }: Props) {
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -25,7 +30,7 @@ export function UserDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40">
-        <DropdownMenuLabel>user.username</DropdownMenuLabel>
+        <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
@@ -36,7 +41,9 @@ export function UserDropdown() {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={() => {}}
+            onClick={() => {
+              router.push("/");
+            }}
           >
             <LogOut size={16} /> Logout
           </DropdownMenuItem>

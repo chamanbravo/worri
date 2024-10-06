@@ -1,5 +1,5 @@
 from api.dependencies import get_current_admin
-from api.dependencies import get_current_user
+from api.dependencies import get_current_user  # type: ignore
 from crud import user_crud
 from database.database import get_db
 from fastapi import APIRouter
@@ -25,13 +25,10 @@ def setup(db: Session = Depends(get_db)):
     return {"need_setup": need_setup}
 
 
-@router.get(
-    "/{username}",
-    response_model=UserOut,
-    dependencies=[Depends(get_current_user)],
-)
-def get_user(username: str, db: Session = Depends(get_db)):
-    user = user_crud.get_user_by_username(db, username=username)
+@router.get("/me", response_model=UserOut)
+def get_current_user(
+    user: User = Depends(get_current_user)
+):
     return user
 
 
@@ -40,12 +37,25 @@ def get_user(username: str, db: Session = Depends(get_db)):
     response_model=WorkspaceListOut,
     dependencies=[Depends(get_current_user)],
 )
-def get_user_workspaces(
+def get_user_workspaces(  # type: ignore
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     workspaces = user_crud.get_user_workspaces(db, username=str(user.username))
-    return {"workspaces": workspaces}
+    if len(workspaces):
+        workspace_names = [workspace.name for workspace in workspaces]  # type: ignore
+        return {"workspaces": workspace_names}
+    return {"workspaces": []}
+
+
+@router.get(
+    "/{username}",
+    response_model=UserOut,
+    dependencies=[Depends(get_current_user)],
+)
+def get_user(username: str, db: Session = Depends(get_db)):
+    user = user_crud.get_user_by_username(db, username=username)
+    return user
 
 
 @router.post(

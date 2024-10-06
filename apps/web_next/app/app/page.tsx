@@ -1,8 +1,13 @@
 import NoWorkspacesState from "@/components/workspace/no-workspaces-state";
-import { fetchUserWorkspaces } from "@/lib/api/users";
+import { fetchCurrentUserWorkspaces } from "@/lib/api/users";
+import { redirect } from "next/navigation";
 
 export default async function page() {
-  const workspaces = await fetchUserWorkspaces();
+  const workspaces = await fetchCurrentUserWorkspaces();
+
+  if (workspaces?.length) {
+    redirect(`/app/${workspaces[0]}/dashboard/`);
+  }
 
   return (
     <div className="pb-16 space-y-6 md:block max-w-[1280px] mx-auto">

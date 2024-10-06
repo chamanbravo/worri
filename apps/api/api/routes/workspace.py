@@ -1,12 +1,19 @@
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
-
-from api.dependencies import get_current_admin, get_current_user
+from api.dependencies import get_current_admin
+from api.dependencies import get_current_user
 from crud import workspace_crud
 from database.database import get_db
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
+from models.user import User
 from models.workspace import Workspace
 from schemas.base import GenericOut
-from schemas.workspace import WorkspaceBase, WorkspaceOut, WorkspacePatch
+from schemas.workspace import WorkspaceBase
+from schemas.workspace import WorkspaceOut
+from schemas.workspace import WorkspacePatch
+from sqlalchemy.orm import Session
+from utils.security import gen_workspace_access_code
 
 router = APIRouter(tags=["workspace"], prefix="/workspaces")
 
@@ -17,9 +24,28 @@ router = APIRouter(tags=["workspace"], prefix="/workspaces")
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_admin)],
 )
-def create(workspace_data: WorkspaceBase, db: Session = Depends(get_db)):
-    new_workspace = Workspace(name=workspace_data.name)
+def create(
+    workspace_data: WorkspaceBase,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin),
+):
+    workspace = workspace_crud.get_workspace_by_name(db, workspace_data.name)
+    if workspace:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Workspace already exists.",
+        )
+    access_code = gen_workspace_access_code()
+    new_workspace = Workspace(
+        name=workspace_data.name,
+        access_code=access_code,
+        created_by_id=current_user.id,
+    )
     workspace = workspace_crud.create_workspace(db, new_workspace)
+
+    if workspace:
+        workspace_crud.add_user_to_workspace(db, workspace, current_user)
+
     return workspace
 
 

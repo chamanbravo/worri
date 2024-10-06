@@ -1,3 +1,5 @@
+import secrets
+import string
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -35,3 +37,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+
+def gen_workspace_access_code() -> str:
+    return "".join(secrets.choice(string.ascii_letters) for _ in range(10))

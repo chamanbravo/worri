@@ -14,45 +14,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import useUserStore from "@/store/userStore";
+import { useToast } from "@/hooks/use-toast";
+import { clientFetch } from "@/lib/api/clientFetch";
+import { useRouter } from "next/navigation";
 
 export function CreateWorkspaceDialog() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [name, setName] = useState<string>("");
   const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
-  //     async () => {
-  //       const { response, error } = await POST("/api/workspaces/create/", {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "x-csrftoken": Cookies.get("csrftoken") || "",
-  //         },
-  //         body: {
-  //           name: name,
-  //         },
-  //       });
-
-  //       if (response.ok) {
-  //         toast({
-  //           title: "Workspace created successfully.",
-  //         });
-  //         refetch();
-  //         updateWorkspace();
-  //       }
-  //       if (!response.ok && error) {
-  //         if ("detail" in error) {
-  //           toast({
-  //             title: error.detail,
-  //           });
-  //         } else if ("name" in error) {
-  //           toast({
-  //             title: error["name"][0],
-  //           });
-  //         } else {
-  //           toast({
-  //             title: "Something went wrong!",
-  //           });
-  //         }
-  //       }
-  //     }
+  const createWorkspace = async () => {
+    try {
+      const response = await clientFetch("/api/workspaces", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name,
+        }),
+      });
+      if (response.ok) {
+        toast({
+          title: "Workspace created successfully.",
+        });
+        updateWorkspace();
+        router.refresh();
+      }
+      if (!response.ok) {
+        const message = await response.json();
+        if (message?.detail) {
+          toast({
+            title: message?.detail,
+          });
+        }
+      }
+    } catch (err) {
+      toast({
+        title: "Something went wrong!",
+      });
+    }
+  };
 
   return (
     <Dialog>
@@ -78,7 +78,12 @@ export function CreateWorkspaceDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={() => {}}>
+          <Button
+            type="submit"
+            onClick={() => {
+              createWorkspace();
+            }}
+          >
             Submit
           </Button>
         </DialogFooter>

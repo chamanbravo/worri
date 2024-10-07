@@ -10,6 +10,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -17,29 +26,33 @@ import { clientFetch } from "@/lib/api/clientFetch";
 import { components } from "@/lib/api/types";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
-  defaultValues?: components["schemas"]["WebsiteOut"];
+  defaultValues?: components["schemas"]["UserOut"];
 }
 
-export function WebsiteDialog({ defaultValues }: Props) {
+type RoleEnum = components["schemas"]["RoleEnum"];
+
+export function UserDialog({ defaultValues }: Props) {
   const { workspace } = useParams();
   const { toast } = useToast();
   const [name, setName] = useState<string>("");
-  const [domain, setDomain] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [role, setRole] = useState<RoleEnum>("VIEWER");
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const onSubmit = async () => {
     if (!workspace) return;
     const response = await clientFetch(
-      defaultValues ? `/api/websites/${defaultValues?.id}` : "/api/websites",
+      defaultValues ? `/api/users/${defaultValues?.username}` : "/api/users",
       {
         method: defaultValues ? "PATCH" : "POST",
         body: JSON.stringify({
-          workspace: workspace,
-          name: name,
-          domain: domain,
+          username: name,
+          password: password,
+          role: role,
         }),
       }
     );
@@ -47,18 +60,22 @@ export function WebsiteDialog({ defaultValues }: Props) {
     if (response.ok) {
       toast({
         title: defaultValues
-          ? "Workspace updated successfully."
-          : "Workspace created successfully.",
+          ? "Member updated successfully."
+          : "Member created successfully.",
       });
       setOpen(false);
       router.refresh();
+    } else {
+      toast({
+        title: "Please fill the form with valid details.",
+      });
     }
   };
 
   useEffect(() => {
     if (defaultValues) {
-      setName(defaultValues.name);
-      setDomain(defaultValues.domain);
+      setName(defaultValues.username);
+      setRole(defaultValues.role as RoleEnum);
     }
   }, [defaultValues]);
 
@@ -66,35 +83,51 @@ export function WebsiteDialog({ defaultValues }: Props) {
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         {!defaultValues ? (
-          <Button>Add Website</Button>
+          <Button>Add User</Button>
         ) : (
           <Button variant="outline">Edit</Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Website</DialogTitle>
+          <DialogTitle>Member details</DialogTitle>
           <DialogDescription>Enter the details below.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-6 mt-4">
           <div className="flex flex-col w-full gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Username</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full"
+              disabled={!!defaultValues}
             />
           </div>
           <div className="flex flex-col w-full gap-2">
-            <Label htmlFor="domain">Domain</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
-              id="domain"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full"
             />
           </div>
+          <Select onValueChange={(v) => setRole(v as RoleEnum)} value={role}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Role</SelectLabel>
+                <Separator className="my-1" />
+                <SelectItem value="VIEWER">VIEWER</SelectItem>
+                {/* <SelectItem value="EDITOR">EDITOR</SelectItem> */}
+                <SelectItem value="ADMIN">ADMIN</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
         <DialogFooter>
           <Button type="submit" onClick={onSubmit}>

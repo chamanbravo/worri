@@ -75,12 +75,12 @@ export default function Navbar({ user, workspaces }: Props) {
           </nav>
         </div>
 
-        {/* <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 ml-auto">
           {workspaces?.length ? (
             <WorkspaceDropdown workspaces={workspaces} />
           ) : null}
           <UserDropdown user={user} />
-        </div> */}
+        </div>
       </div>
     </div>
   );

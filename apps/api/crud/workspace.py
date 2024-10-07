@@ -3,8 +3,10 @@ from typing import Optional
 from fastapi import HTTPException
 from fastapi import status
 from models.user import User
+from models.user import user_workspace
 from models.workspace import Workspace
 from schemas.workspace import WorkspacePatch
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .base import BaseCRUDRepository
@@ -68,6 +70,16 @@ class WorkspaceCRUDRepository(BaseCRUDRepository):
             return workspace
         else:
             return None
+
+    def get_users_in_workspace(self, db: Session, workspace_id: int):
+        query = (
+            select(User)
+            .join(user_workspace)
+            .where(user_workspace.c.workspace_id == workspace_id)
+        )
+
+        users = db.execute(query).scalars().all()
+        return users
 
 
 workspace_crud = WorkspaceCRUDRepository(model=Workspace)

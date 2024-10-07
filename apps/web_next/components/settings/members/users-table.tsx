@@ -6,39 +6,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { WebsiteDialog } from "./website-dialog";
+import { UserDialog } from "./users-dialog";
 import { components } from "@/lib/api/types";
 
 interface Props {
-  data: components["schemas"]["WebsiteOut"][];
+  data: components["schemas"]["UserOut"][];
   currentWorkspace: string;
 }
 
-export default function WebsitesTable({ data }: Props) {
+export default function UsersTable({ data }: Props) {
   return (
     <>
       <div className="flex justify-end w-full">
         <div className="inline-flex gap-2">
-          <WebsiteDialog />
+          <UserDialog />
         </div>
       </div>
       {data?.length ? (
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead>Name</TableHead>
-              <TableHead>Domain</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.map((w, i) => {
+            {data?.map((user, i) => {
               return (
                 <TableRow key={i} className="hover:bg-transparent">
-                  <TableCell className="font-medium">{w.name}</TableCell>
-                  <TableCell>{w.domain}</TableCell>
+                  <TableCell className="font-medium">{user.username}</TableCell>
+                  <TableCell>{user.role}</TableCell>
                   <TableCell className="flex items-center justify-end gap-2">
-                    <WebsiteDialog defaultValues={w} />
+                    <UserDialog defaultValues={user} />
                   </TableCell>
                 </TableRow>
               );

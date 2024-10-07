@@ -26,10 +26,34 @@ def setup(db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserOut)
-def get_current_user(
-    user: User = Depends(get_current_user)
-):
+def get_current_user(user: User = Depends(get_current_user)):
     return user
+
+
+@router.post(
+    "", response_model=GenericOut, status_code=status.HTTP_201_CREATED
+)
+def create_user(
+    user_data: UserCreate,
+    admin_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    user = user_crud.get_user_by_username(db, username=user_data.username)
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The user with this username already exists in the system",
+        )
+
+    new_user = User(
+        username=user_data.username,
+        hashed_password=get_password_hash(user_data.password),
+        role=user_data.role,
+        created_by_id=admin_user.id,
+    )
+    user_crud.create_user(db, user_data=new_user)
+
+    return {"detail": "User created successfully."}
 
 
 @router.get(
@@ -56,34 +80,6 @@ def get_user_workspaces(  # type: ignore
 def get_user(username: str, db: Session = Depends(get_db)):
     user = user_crud.get_user_by_username(db, username=username)
     return user
-
-
-@router.post(
-    "/create",
-    response_model=GenericOut,
-    dependencies=[Depends(get_current_user)],
-)
-def create_user(
-    user_data: UserCreate,
-    admin_user: User = Depends(get_current_admin),
-    db: Session = Depends(get_db),
-):
-    user = user_crud.get_user_by_username(db, username=user_data.username)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"The user with this username already exists in the system",
-        )
-
-    # todo:  add created_by
-    new_user = User(
-        username=user_data.username,
-        hashed_password=get_password_hash(user_data.password),
-        role=user_data.role,
-    )
-    user_crud.create_user(db, user_data=new_user)
-
-    return {"detail": "User created successfully."}
 
 
 @router.delete(

@@ -10,6 +10,7 @@ from fastapi import status
 from models.user import User
 from models.workspace import Workspace
 from schemas.base import GenericOut
+from schemas.user import UserOut
 from schemas.website import WebsiteOut
 from schemas.workspace import WorkspaceBase
 from schemas.workspace import WorkspaceOut
@@ -95,7 +96,7 @@ def patch_workspace(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
-def workspaces_websites(name: str, db: Session = Depends(get_db)):
+def workspace_websites(name: str, db: Session = Depends(get_db)):
     workspace = workspace_crud.get_workspace_by_name(db, workspace_name=name)
     if workspace is None:
         raise HTTPException(
@@ -110,3 +111,26 @@ def workspaces_websites(name: str, db: Session = Depends(get_db)):
         )
     websites = website_crud.get_websites_by_workspace(db, workspace_id)
     return websites
+
+
+@router.get(
+    "/{name}/users",
+    response_model=list[UserOut],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
+)
+def workspace_users(name: str, db: Session = Depends(get_db)):
+    workspace = workspace_crud.get_workspace_by_name(db, workspace_name=name)
+    if workspace is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Workspace doesn't exist.",
+        )
+    workspace_id = db.scalar(select(workspace.id))
+    if workspace_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Workspace ID is unexpectedly None.",
+        )
+    users = workspace_crud.get_users_in_workspace(db, workspace_id)
+    return users

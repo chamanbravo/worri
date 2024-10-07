@@ -37,6 +37,16 @@ class WorkspaceCRUDRepository(BaseCRUDRepository):
         )
         return workspace
 
+    def get_workspace_by_access_code(
+        self, db: Session, access_code: str
+    ) -> Optional[Workspace]:
+        workspace = (
+            db.query(Workspace)
+            .filter(Workspace.access_code == access_code)
+            .first()
+        )
+        return workspace
+
     def delete_workspace(
         self,
         db: Session,

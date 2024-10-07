@@ -12,6 +12,7 @@ from models.workspace import Workspace
 from schemas.base import GenericOut
 from schemas.user import UserOut
 from schemas.website import WebsiteOut
+from schemas.workspace import JoinWorkspace
 from schemas.workspace import WorkspaceBase
 from schemas.workspace import WorkspaceOut
 from schemas.workspace import WorkspacePatch
@@ -51,6 +52,30 @@ def create(
         workspace_crud.add_user_to_workspace(db, workspace, current_user)
 
     return workspace
+
+
+@router.post(
+    "/join",
+    response_model=GenericOut,
+    status_code=status.HTTP_200_OK,
+)
+def join_workspace(
+    join_workspace: JoinWorkspace,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    workspace = workspace_crud.get_workspace_by_access_code(
+        db, join_workspace.access_code
+    )
+    if workspace is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid access code.",
+        )
+    current_user.workspaces.append(workspace)
+    db.commit()
+
+    return {"detail": "Workspace joined successfully."}
 
 
 @router.get(

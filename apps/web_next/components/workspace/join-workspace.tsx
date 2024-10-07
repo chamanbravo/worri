@@ -12,38 +12,36 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { clientFetch } from "@/lib/api/clientFetch";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function JoinWorkspaceDialog() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [accessCode, setAccessCode] = useState<string>("");
-  //   const updateWorkspace = useUserStore((state) => state.updateWorkspace);
 
-  //   const { mutate } = useMutation({
-  //     mutationFn: async () => {
-  //       const { response } = await POST("/api/workspaces/join/", {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "x-csrftoken": Cookies.get("csrftoken") || "",
-  //         },
-  //         body: {
-  //           access_code: accessCode,
-  //         },
-  //       });
+  const onSubmit = async () => {
+    const response = await clientFetch("/api/workspaces/join", {
+      method: "POST",
+      body: JSON.stringify({
+        access_code: accessCode,
+      }),
+    });
 
-  //       if (response.ok) {
-  //         toast({
-  //           title: "Workspace joined successfully.",
-  //         });
-  //         refetch();
-  //         updateWorkspace();
-  //       }
-  //       if (!response.ok) {
-  //         toast({
-  //           title: "Invalid access code.",
-  //         });
-  //       }
-  //     },
-  //   });
+    if (response.ok) {
+      toast({
+        title: "Workspace joined successfully.",
+      });
+      router.refresh();
+    }
+    if (!response.ok) {
+      toast({
+        title: "Invalid access code.",
+      });
+    }
+  };
 
   return (
     <Dialog>
@@ -67,7 +65,7 @@ export function JoinWorkspaceDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={() => {}}>
+          <Button type="submit" onClick={onSubmit}>
             Submit
           </Button>
         </DialogFooter>

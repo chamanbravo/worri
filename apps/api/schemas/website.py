@@ -1,6 +1,7 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class WebsiteIn(BaseModel):
@@ -13,7 +14,6 @@ class WebsiteOut(BaseModel):
     id: int
     name: str = Field(min_length=2)
     domain: str = Field(min_length=2)
-    workspace: str
 
 
 class WebsitePatch(BaseModel):

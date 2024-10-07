@@ -7,7 +7,7 @@ import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import { components } from "@/lib/api/types";
 import useUserStore from "@/store/userStore";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const active = "text-sm font-medium hover:text-foreground";
 const inactive = cn(active, "text-muted-foreground");
@@ -21,6 +21,10 @@ export default function Navbar({ user, workspaces }: Props) {
   const pathname = usePathname();
   const setUser = useUserStore((state) => state.setUser);
   const pathnameRegex = /^\/app\/.+$/;
+  const currentWorkspace = useMemo(
+    () => pathname.split("/")[2] || null,
+    [pathname]
+  );
 
   useEffect(() => {
     if (pathnameRegex.test(pathname) && !workspaces?.length) {
@@ -43,16 +47,27 @@ export default function Navbar({ user, workspaces }: Props) {
           <p className="font-medium">logo</p>
           <nav className={"flex items-center space-x-4 mx-6"}>
             <Link
-              href={"/app/"}
+              href={
+                currentWorkspace
+                  ? `/app/${currentWorkspace}/dashboard`
+                  : "/app/"
+              }
               className={pathname.includes("dashboard") ? active : inactive}
             >
               Dashboard
             </Link>
-            <Link href={"/app/"} className={inactive}>
+            <Link
+              href={
+                currentWorkspace ? `/app/${currentWorkspace}/websites` : "/app/"
+              }
+              className={inactive}
+            >
               Websites
             </Link>
             <Link
-              href={"/app/"}
+              href={
+                currentWorkspace ? `/app/${currentWorkspace}/settings` : "/app/"
+              }
               className={pathname.includes("/settings/") ? active : inactive}
             >
               Settings
@@ -60,12 +75,12 @@ export default function Navbar({ user, workspaces }: Props) {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        {/* <div className="flex items-center gap-2 ml-auto">
           {workspaces?.length ? (
             <WorkspaceDropdown workspaces={workspaces} />
           ) : null}
           <UserDropdown user={user} />
-        </div>
+        </div> */}
       </div>
     </div>
   );

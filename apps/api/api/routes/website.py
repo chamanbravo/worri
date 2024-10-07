@@ -1,12 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from api.dependencies import get_current_admin, get_token
-from crud import website_crud, workspace_crud
+from api.dependencies import get_current_admin
+from api.dependencies import get_token
+from crud import website_crud
+from crud import workspace_crud
 from database.database import get_db
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
 from models.website import Website
 from schemas.base import GenericOut
-from schemas.website import WebsiteIn, WebsiteOut, WebsitePatch
+from schemas.website import WebsiteIn
+from schemas.website import WebsiteOut
+from schemas.website import WebsitePatch
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["website"], prefix="/websites")
 
@@ -27,14 +33,16 @@ def create_website(website_data: WebsiteIn, db: Session = Depends(get_db)):
     new_website = Website(
         name=website_data.name,
         domain=website_data.domain,
-        workspace=workspace.id,
+        workspace_id=workspace.id,
     )
     website_created = website_crud.create_website(db, website_data=new_website)
     return website_created
 
 
 @router.get(
-    "/{id}", response_model=WebsiteOut, dependencies=[Depends(get_token)]
+    "/{website_id}",
+    response_model=WebsiteOut,
+    dependencies=[Depends(get_token)],
 )
 def get_website(website_id: int, db: Session = Depends(get_db)):
     website = website_crud.get_website_by_id(db, website_id)
@@ -48,7 +56,9 @@ def get_website(website_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch(
-    "/{id}", response_model=WebsiteOut, dependencies=[Depends(get_token)]
+    "/{website_id}",
+    response_model=WebsiteOut,
+    dependencies=[Depends(get_token)],
 )
 def update_website(
     website_id: int, website_data: WebsitePatch, db: Session = Depends(get_db)
@@ -64,7 +74,7 @@ def update_website(
 
 
 @router.delete(
-    "/{id}",
+    "/{website_id}",
     response_model=GenericOut,
     dependencies=[Depends(get_current_admin)],
 )

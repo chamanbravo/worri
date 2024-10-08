@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { clientFetch } from "@/lib/api/clientFetch";
 import { components } from "@/lib/api/types";
+import useUserStore from "@/store/userStore";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -29,6 +30,7 @@ export function WebsiteDialog({ defaultValues }: Props) {
   const [domain, setDomain] = useState<string>("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
 
   const onSubmit = async () => {
     if (!workspace) return;
@@ -66,9 +68,11 @@ export function WebsiteDialog({ defaultValues }: Props) {
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         {!defaultValues ? (
-          <Button>Add Website</Button>
+          <Button disabled={user.role !== "ADMIN"}>Add Website</Button>
         ) : (
-          <Button variant="outline">Edit</Button>
+          <Button variant="outline" disabled={user.role !== "ADMIN"}>
+            Edit
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

@@ -27,6 +27,7 @@ import { components } from "@/lib/api/types";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import useUserStore from "@/store/userStore";
 
 interface Props {
   defaultValues?: components["schemas"]["UserOut"];
@@ -42,6 +43,7 @@ export function UserDialog({ defaultValues }: Props) {
   const [role, setRole] = useState<RoleEnum>("VIEWER");
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
 
   const onSubmit = async () => {
     if (!workspace) return;
@@ -83,9 +85,11 @@ export function UserDialog({ defaultValues }: Props) {
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         {!defaultValues ? (
-          <Button>Add User</Button>
+          <Button disabled={user.role !== "ADMIN"}>Add User</Button>
         ) : (
-          <Button variant="outline">Edit</Button>
+          <Button variant="outline" disabled={user.role !== "ADMIN"}>
+            Edit
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

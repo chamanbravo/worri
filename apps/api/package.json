@@ -1,0 +1,20 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "uvicorn main:app --reload",
+    "make-migrations": "alembic revision --autogenerate",
+    "migrate": "alembic upgrade head"
+  },
+  "keywords": [
+    "worri",
+    "api",
+    "web analytics",
+    "chaman bravo",
+    "callbackcat"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

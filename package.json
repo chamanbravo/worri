@@ -1,6 +1,12 @@
 {
   "name": "worri",
   "private": true,
+  "keywords": [
+    "worri",
+    "web analytics",
+    "chaman bravo",
+    "callbackcat"
+  ],
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",

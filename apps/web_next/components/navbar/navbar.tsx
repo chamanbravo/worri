@@ -60,7 +60,9 @@ export default function Navbar({ user, workspaces }: Props) {
               href={
                 currentWorkspace ? `/app/${currentWorkspace}/websites` : "/app/"
               }
-              className={inactive}
+              className={
+                pathname.split("/").at(-2) === "websites" ? active : inactive
+              }
             >
               Websites
             </Link>
